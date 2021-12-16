@@ -9,6 +9,8 @@ import { routes } from "./api/routes/routes";
 const app = express();
 const server = http.createServer(app);
 
+app.use(express.json());
+
 const io = new Server(server, {
   cors: {
     origin: "*",

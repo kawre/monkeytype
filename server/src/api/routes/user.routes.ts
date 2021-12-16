@@ -1,7 +1,10 @@
-import express, { json } from "express";
+import { Router } from "express";
+import { validateBody } from "../../utils/validateBody";
+import { createUserHandler } from "../controllers/user.controller";
+import { createUserSchema } from "../validations/user.validation";
 
-const users = express.Router();
+const users = Router();
 
-users.get("/", (req, res) => {});
+users.post("/", validateBody(createUserSchema), createUserHandler);
 
 export default users;
