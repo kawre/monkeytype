@@ -8,9 +8,6 @@ import { routes } from "./api/routes/routes";
 
 const app = express();
 const server = http.createServer(app);
-
-app.use(express.json());
-
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -18,12 +15,16 @@ const io = new Server(server, {
   },
 });
 
+// middleware
+app.use(express.json());
+
+// socketio
 const onConnection = (socket: Socket) => {
   roomHandler(io, socket);
 };
-
 io.on("connection", onConnection);
 
+// listen
 server.listen(config.port, async () => {
   await connect();
   console.log(`🚀 App running on port ${config.port} 🚀`);

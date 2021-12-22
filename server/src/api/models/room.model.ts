@@ -15,6 +15,6 @@ const roomSchema = new Schema(
   { timestamps: true }
 );
 
-const Room = model("Room", roomSchema);
+const Room = model<RoomDocument>("Room", roomSchema);
 
 export default Room;

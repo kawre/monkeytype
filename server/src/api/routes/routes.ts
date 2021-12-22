@@ -3,9 +3,9 @@ import roomRouter from "./room.routes";
 import userRouter from "./user.routes";
 
 export const routes = (app: Express) => {
-  // user's routes
+  // user routes
   app.use("/api/users", userRouter);
 
-  // room's routes
+  // room routes
   app.use("/api/rooms", roomRouter);
 };

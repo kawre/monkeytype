@@ -5,6 +5,7 @@ import { createUserSchema } from "../validations/user.validation";
 
 const users = Router();
 
+// create user
 users.post("/", validateBody(createUserSchema), createUserHandler);
 
 export default users;
