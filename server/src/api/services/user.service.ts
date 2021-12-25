@@ -1,11 +1,12 @@
 import { FilterQuery } from "mongoose";
+import { omitPassword } from "../../utils/omitPassword";
 import User, { UserDocument } from "../models/user.model";
 
 // create user
 export const createUser = async (input: UserDocument) => {
   try {
-    const { password, ...user } = (await User.create(input)).toJSON();
-    return user;
+    const user = await User.create(input);
+    return omitPassword(user.toJSON());
   } catch (e) {
     throw new Error(e);
   }
@@ -15,7 +16,7 @@ export const createUser = async (input: UserDocument) => {
 export const findUser = async (query: FilterQuery<UserDocument>) => {
   const user = await User.findOne(query);
   if (!user) return null;
-  return user.toJSON();
+  return omitPassword(user);
 };
 
 // validate password
@@ -32,5 +33,5 @@ export const validatePassword = async ({
   const isValid = await user.comparePassword(password);
   if (!isValid) return false;
 
-  return user.toJSON();
+  return omitPassword(user.toJSON());
 };

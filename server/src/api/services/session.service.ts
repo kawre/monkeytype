@@ -1,11 +1,15 @@
-import { AnyObject, FilterQuery, UpdateQuery } from "mongoose";
+import { FilterQuery, UpdateQuery } from "mongoose";
 import config from "../../config";
 import { signJwt, verifyJwt } from "../../utils/jwt.utils";
 import Session, { SessionDocument } from "../models/session.model";
+import { UserDocument } from "../models/user.model";
 import { findUser } from "./user.service";
 
 // create session
-export const createSession = async (user: AnyObject, userAgent: string) => {
+export const createSession = async (
+  user: UserDocument["_id"],
+  userAgent: string
+) => {
   const session = await Session.create({ user, userAgent });
   return session.toJSON();
 };

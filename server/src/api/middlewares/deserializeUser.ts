@@ -26,8 +26,7 @@ export const deserializeUser = async (
 
     if (newAccessToken) {
       res.setHeader("x-access-token", newAccessToken);
-      const { decoded } = verifyJwt(newAccessToken);
-      res.locals.user = decoded;
+      res.locals.user = verifyJwt(newAccessToken).decoded!;
     }
 
     return next();

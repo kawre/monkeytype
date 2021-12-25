@@ -1,4 +1,5 @@
 import { sign, SignOptions, verify } from "jsonwebtoken";
+import { UserDocument } from "../api/models/user.model";
 import config from "../config";
 
 export const signJwt = (payload: Object, options?: SignOptions) => {
@@ -15,7 +16,7 @@ export const verifyJwt = (token: string) => {
     return {
       valid: true,
       expired: false,
-      decoded,
+      decoded: decoded as UserDocument,
     };
   } catch (e: any) {
     return {

@@ -36,7 +36,7 @@ export const createSessionHandler = async (req: Request, res: Response) => {
 };
 
 // find session
-export const getSessionHandler = async (req: Request, res: Response) => {
+export const getSessionHandler = async (_: Request, res: Response) => {
   const user = res.locals.user._id;
   const session = await findSession({ user, valid: true });
 
@@ -44,7 +44,7 @@ export const getSessionHandler = async (req: Request, res: Response) => {
 };
 
 // delete session
-export const deleteSessionHandler = async (req: Request, res: Response) => {
+export const deleteSessionHandler = async (_: Request, res: Response) => {
   const sessionId = res.locals.user._id;
   await updateSession(sessionId, { valid: false });
 
