@@ -1,0 +1,41 @@
+import { AnyObject, FilterQuery, UpdateQuery } from "mongoose";
+import config from "../../config";
+import { signJwt, verifyJwt } from "../../utils/jwt.utils";
+import Session, { SessionDocument } from "../models/session.model";
+import { findUser } from "./user.service";
+
+// create session
+export const createSession = async (user: AnyObject, userAgent: string) => {
+  const session = await Session.create({ user, userAgent });
+  return session.toJSON();
+};
+
+// find session
+export const findSession = async (query: FilterQuery<SessionDocument>) => {
+  return Session.findOne(query).lean();
+};
+
+// update session
+export const updateSession = (
+  query: FilterQuery<SessionDocument>,
+  update: UpdateQuery<SessionDocument>
+) => {
+  return Session.updateOne(query, update);
+};
+
+// reissue access token
+export const reIssueAccessToken = async (refreshToken: string) => {
+  const { decoded }: any = verifyJwt(refreshToken);
+  if (!decoded || !decoded.session) return false;
+
+  const session = await Session.findById(decoded.session);
+  if (!session || !session.valid) return false;
+
+  const user = await findUser({ _id: session.user });
+  if (!user) return false;
+
+  return signJwt(
+    { ...user, session: session._id },
+    { expiresIn: config.accessTokenTtl } // 15m
+  );
+};

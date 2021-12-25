@@ -1,7 +1,7 @@
 import express from "express";
 import http from "http";
 import { Server, Socket } from "socket.io";
-import config from "./config/default";
+import config from "./config";
 import { connect } from "./utils/connect";
 import roomHandler from "./api/handlers/room.handler";
 import { routes } from "./api/routes/routes";

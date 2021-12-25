@@ -1,6 +1,7 @@
 import { hash } from "bcrypt";
 import { Document, model, Schema } from "mongoose";
-import config from "../../config/default";
+import config from "../../config";
+import { compare } from "bcrypt";
 
 export interface UserDocument extends Document {
   username: string;
@@ -8,6 +9,7 @@ export interface UserDocument extends Document {
   email: string;
   createdAt: Date;
   updatedAt: Date;
+  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 const userSchema = new Schema(
@@ -25,6 +27,7 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: true,
+      select: false,
     },
   },
   { timestamps: true }
@@ -38,6 +41,23 @@ userSchema.pre("save", async function (next) {
   user.password = await hash(user.password, config.salt);
   return next();
 });
+
+// check if given password matches
+userSchema.methods.comparePassword = async function (
+  candidatePassword: string
+): Promise<boolean> {
+  const user = this as UserDocument;
+  console.log(user);
+
+  return compare(candidatePassword, user.password).catch(() => false);
+};
+
+// omit password from user
+userSchema.methods.toJSON = function () {
+  const obj = this.toObject(); //or var obj = this;
+  delete obj.password;
+  return obj;
+};
 
 const User = model<UserDocument>("User", userSchema);
 
