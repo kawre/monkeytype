@@ -5,7 +5,6 @@ import { createUser, findUser } from "../services/user.service";
 export const createUserHandler = async (req: Request, res: Response) => {
   try {
     const user = await createUser(req.body);
-    res.locals.user = user;
     return res.send(user);
   } catch (e: any) {
     return res.status(409).send(e.message);
@@ -20,4 +19,9 @@ export const findUserHandler = async (req: Request, res: Response) => {
   } catch {
     return res.status(404);
   }
+};
+
+// me
+export const meHandler = async (req: Request, res: Response) => {
+  return res.send(res.locals.user);
 };

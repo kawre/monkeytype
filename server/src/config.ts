@@ -6,10 +6,12 @@ interface Config {
   dbUri: string;
   salt: number;
   corsOrigin: string;
-  privateKey: string;
-  publicKey: string;
   accessTokenTtl: string;
   refreshTokenTtl: string;
+  accessTokenPublicKey: string;
+  accessTokenPrivateKey: string;
+  refreshTokenPublicKey: string;
+  refreshTokenPrivateKey: string;
 }
 
 const config: Config = {
@@ -17,10 +19,12 @@ const config: Config = {
   corsOrigin: cfg.get("corsOrigin"),
   salt: cfg.get("saltWorkFactor"),
   dbUri: cfg.get("dbUri"),
-  privateKey: cfg.get("privateKey"),
-  publicKey: cfg.get("publicKey"),
+  accessTokenPublicKey: cfg.get("accessTokenPublicKey"),
+  accessTokenPrivateKey: cfg.get("accessTokenPrivateKey"),
+  refreshTokenPublicKey: cfg.get("refreshTokenPublicKey"),
+  refreshTokenPrivateKey: cfg.get("refreshTokenPrivateKey"),
   accessTokenTtl: cfg.get("accessTokenTtl"),
-  refreshTokenTtl: cfg.get("accessTokenTtl"),
+  refreshTokenTtl: cfg.get("refreshTokenTtl"),
 };
 
 export default config;

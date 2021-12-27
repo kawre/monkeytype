@@ -1,22 +1,39 @@
 import { sign, SignOptions, verify } from "jsonwebtoken";
-import { UserDocument } from "../api/models/user.model";
+import { get } from "lodash";
 import config from "../config";
 
-export const signJwt = (payload: Object, options?: SignOptions) => {
-  return sign(payload, config.privateKey, {
+export const signJwt = (
+  payload: Object,
+  keyName: "accessTokenPrivateKey" | "refreshTokenPrivateKey",
+  options?: SignOptions
+) => {
+  // const signingKey = Buffer.from(get(config, keyName), "base64").toString(
+  //   "ascii"
+  // );
+  const signingKey = get(config, keyName);
+
+  return sign(payload, signingKey, {
     ...(options && options),
     algorithm: "RS256",
   });
 };
 
-export const verifyJwt = (token: string) => {
+export const verifyJwt = (
+  token: string,
+  keyName: "accessTokenPublicKey" | "refreshTokenPublicKey"
+) => {
+  // const publicKey = Buffer.from(get(config, keyName), "base64").toString(
+  //   "ascii"
+  // );
+  const publicKey = get(config, keyName);
+
   try {
-    const decoded = verify(token, config.publicKey);
+    const decoded = verify(token, publicKey);
 
     return {
       valid: true,
       expired: false,
-      decoded: decoded as UserDocument,
+      decoded,
     };
   } catch (e: any) {
     return {

@@ -29,7 +29,7 @@ export const updateSession = (
 
 // reissue access token
 export const reIssueAccessToken = async (refreshToken: string) => {
-  const { decoded }: any = verifyJwt(refreshToken);
+  const { decoded }: any = verifyJwt(refreshToken, "refreshTokenPublicKey");
   if (!decoded || !decoded.session) return false;
 
   const session = await Session.findById(decoded.session);
@@ -38,8 +38,12 @@ export const reIssueAccessToken = async (refreshToken: string) => {
   const user = await findUser({ _id: session.user });
   if (!user) return false;
 
-  return signJwt(
+  //! crash here
+  const accessToken = signJwt(
     { ...user, session: session._id },
-    { expiresIn: config.accessTokenTtl } // 15m
+    "accessTokenPrivateKey",
+    { expiresIn: config.accessTokenTtl }
   );
+
+  return accessToken;
 };

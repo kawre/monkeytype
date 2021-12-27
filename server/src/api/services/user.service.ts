@@ -16,7 +16,7 @@ export const createUser = async (input: UserDocument) => {
 export const findUser = async (query: FilterQuery<UserDocument>) => {
   const user = await User.findOne(query);
   if (!user) return null;
-  return omitPassword(user);
+  return omitPassword(user.toJSON());
 };
 
 // validate password
