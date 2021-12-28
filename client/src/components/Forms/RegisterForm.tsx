@@ -1,9 +1,7 @@
 import { Form, Formik } from "formik";
 import { NextPage } from "next";
-import { useRouter } from "next/router";
-import { useMutation } from "react-query";
 import styled from "styled-components";
-import { useCreateSession } from "../../api/auth.api";
+import { useCreateUser } from "../../api/users.api";
 import FormLayout from "../../Layout/FormLayout";
 import Button from "../Button";
 import Heading from "../Heading";
@@ -13,30 +11,40 @@ import FormInput from "./FormInput";
 interface Props {}
 
 // Component ---------------------------------------------------------------------
-const LoginForm: NextPage<Props> = () => {
-  const { mutateAsync } = useCreateSession();
-  const router = useRouter();
-
+const RegisterForm: NextPage<Props> = () => {
+  const { mutateAsync } = useCreateUser();
   return (
     <FormLayout>
       <Heading fontSize={"xxxl"} textAlign={"center"} mb={"1rem"}>
-        Log In
+        Sign Up
       </Heading>
       <Formik
-        initialValues={{ email: "", password: "" }}
+        initialValues={{
+          email: "",
+          password: "",
+          confirmPassword: "",
+          username: "",
+        }}
         onSubmit={async (input) => {
-          try {
-            await mutateAsync(input);
-            router.push("/");
-          } catch (e) {
-            console.log(e);
-          }
+          console.log(input);
+          const res = await mutateAsync(input);
+          console.log(res);
         }}
       >
-        {({ isSubmitting }) => (
+        {() => (
           <Form>
+            <FormInput name="username" placeholder="Username" />
             <FormInput name="email" placeholder="Email" />
-            <FormInput name="password" type="password" placeholder="Password" />
+            <FormInput
+              name="password"
+              placeholder="Password"
+              type={"password"}
+            />
+            <FormInput
+              name="confirmPassword"
+              placeholder="Confirm Password"
+              type={"password"}
+            />
             <Button>Submit</Button>
           </Form>
         )}
@@ -45,7 +53,7 @@ const LoginForm: NextPage<Props> = () => {
   );
 };
 
-export default LoginForm;
+export default RegisterForm;
 
 // Styled ------------------------------------------------------------------------
 

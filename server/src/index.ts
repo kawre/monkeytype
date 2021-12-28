@@ -7,25 +7,22 @@ import roomHandler from "./api/handlers/room.handler";
 import { routes } from "./api/routes/routes";
 import { deserializeUser } from "./api/middlewares/deserializeUser";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+
+const corsOptions = {
+  origin: config.corsOrigin,
+  credentials: true,
+};
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:3000",
-    credentials: true,
-  },
-});
+const io = new Server(server, { cors: corsOptions });
 
 // middleware
 app.use(express.json());
+app.use(cookieParser());
 app.use(deserializeUser);
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
 
 // socketio
 const onConnection = (socket: Socket) => {

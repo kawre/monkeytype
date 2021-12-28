@@ -23,5 +23,6 @@ export const findUserHandler = async (req: Request, res: Response) => {
 
 // me
 export const meHandler = async (_: Request, res: Response) => {
+  console.log(res.locals.user);
   return res.send(res.locals.user);
 };

@@ -12,9 +12,6 @@ const users = Router();
 // create user
 users.post("/", validateBody(createUserSchema), createUserHandler);
 
-// me
-users.get("/me", meHandler);
-
 // find user
 users.get("/", findUserHandler);
 

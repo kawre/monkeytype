@@ -6,7 +6,7 @@ import styled from "styled-components";
 // Types -------------------------------------------------------------------------
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
-  name: "email" | "password";
+  name: "email" | "password" | "confirmPassword" | "username";
 }
 
 // Component ---------------------------------------------------------------------
