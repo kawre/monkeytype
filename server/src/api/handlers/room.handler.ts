@@ -1,71 +1,93 @@
 import { Server, Socket } from "socket.io";
-import { RoomDocument } from "../models/room.model";
-import { findRoomLobby, joinRoom, updateRoom } from "../services/room.service";
+import { UserState } from "../models/room.model";
+import {
+  findAndJoinRoom,
+  getRoomState,
+  initRoomState,
+  updateRoom,
+  updateUserState,
+} from "../services/room.service";
+
+type Params = {
+  userId: string;
+  roomId: string;
+};
+
+export type Collect = {
+  wpm: number;
+  progess: number;
+};
 
 const roomHandler = (io: Server, socket: Socket) => {
-  const { userId } = socket.handshake.query as { userId: string };
+  const { userId, roomId } = socket.handshake.query as Params;
 
   // start count down
-  const startCountDownInterval = (roomId: RoomDocument["_id"]) => {
+  const startCountDownInterval = () => {
     let s = 10;
 
     const countdown = setInterval(async () => {
       if (s === 3) {
         updateRoom({ _id: roomId }, { active: false });
-        console.log("room no longer active");
       }
 
       if (s > 0) {
-        console.log(s);
+        socket.emit("countdown", s);
         s--;
       } else {
         clearInterval(countdown);
-        // startRoomInterval(roomId);
+        startRoomInterval();
       }
     }, 1000);
   };
 
-  // room over
-  const emitRoomOver = () => {};
-
   // start room
-  const startRoomInterval = async (roomId: string) => {
+  const startRoomInterval = async () => {
+    socket.emit("start");
+
     let s = 0;
     const intervalId = setInterval(() => {
-      if (s < 300) {
-        emitRoomState(roomId, {});
-      } else {
-        emitRoomOver();
+      if (s >= 300) {
+        socket.emit("end", true);
         clearInterval(intervalId);
       }
+      socket.emit("time", s);
     }, 1000);
   };
 
   // join room
-  const handleJoinRoom = async (roomId: RoomDocument["_id"]) => {
-    const room = await joinRoom({ roomId, userId });
-
-    if (!room) socket.emit("roomNotFound");
-    else if (room.users.length > 5) socket.emit("tooManyPlayers");
-    else socket.join(roomId);
+  const handleJoinRoom = async () => {
+    await initRoomState(userId, roomId);
   };
 
-  // new room
-  const handleNewRoom = async () => {
-    const room = await findRoomLobby(userId);
-    const roomId = room._id;
+  // find room
+  const handleFindRoom = async () => {
+    // @ts-ignore
+    const { room, isNew } = await findAndJoinRoom(userId);
+    if (!room) return socket.emit("error");
 
-    socket.join(roomId);
-    startCountDownInterval(roomId);
+    if (isNew) {
+      startCountDownInterval();
+    }
+
+    socket.emit("roomId", room._id);
+    return socket.join(room._id);
+  };
+
+  // collect user state
+  const collectUserState = async (state: Collect) => {
+    await updateUserState(userId, roomId, state);
   };
 
   // emit room state
-  const emitRoomState = (room: string, state: object) => {
-    io.sockets.in(room).emit("room:state", "state");
+  const emitUserState = async () => {
+    const state = await getRoomState(roomId);
+    socket.emit("state", state);
+    // io.sockets.in(roomId).emit("room:state", state);
   };
 
+  socket.on("room:user:state", collectUserState);
+  socket.on("room:find", handleFindRoom);
   socket.on("room:join", handleJoinRoom);
-  socket.on("room:new", handleNewRoom);
 };
 
 export default roomHandler;

@@ -1,5 +1,6 @@
 import { FilterQuery, UpdateQuery } from "mongoose";
-import Room, { RoomDocument } from "../models/room.model";
+import { Collect } from "../handlers/room.handler";
+import Room, { RoomDocument, UserState } from "../models/room.model";
 import { UserDocument } from "../models/user.model";
 
 export const createRoom = async (userId: UserDocument["_id"]) => {
@@ -35,7 +36,11 @@ export const joinRoom = async ({
   try {
     const room = await Room.findById(roomId);
 
-    if (!room || room.users.some((u) => u.toString() === userId))
+    if (
+      !room ||
+      room.users.some((u) => u.toString() === userId) ||
+      room.users.length > 5
+    )
       throw new Error();
 
     room.users.push(userId);
@@ -45,13 +50,57 @@ export const joinRoom = async ({
   }
 };
 
-export const findRoomLobby = async (userId: string) => {
+export const findAndJoinRoom = async (userId: string) => {
   try {
-    let room: any = await findRoom({ active: true });
-    if (!room) room = await createRoom(userId);
+    const room = await findRoom({ active: true });
 
-    return room;
+    if (room) {
+      await joinRoom({ roomId: room._id, userId });
+      return {
+        room,
+        isNew: false,
+      };
+    } else {
+      const newRoom = await createRoom(userId);
+      return {
+        room: newRoom,
+        isNew: true,
+      };
+    }
   } catch {
-    return null;
+    return {
+      room: null,
+      isNew: false,
+    };
   }
+};
+
+export const initRoomState = async (userId: string, roomId: string) => {
+  const room = await Room.findById(roomId);
+  if (!room) return null;
+  room.state.push({ user: userId });
+  return room.save();
+};
+
+export const getRoomState = async (roomId: string) => {
+  const room = await Room.findById(roomId);
+  if (!room) return null;
+  return room.state;
+};
+
+export const updateUserState = async (
+  userId: string,
+  roomId: string,
+  state: Collect
+) => {
+  const room = await Room.findById(roomId);
+  if (!room) return null;
+  const i = room.state.map((s) => s.user).indexOf(userId);
+
+  room.state[i] = { ...state };
+
+  console.log({ state: room.state[i], userId });
+
+  await room.save();
+  return room.state;
 };
