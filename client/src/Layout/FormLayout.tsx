@@ -1,26 +1,25 @@
 import { NextPage } from "next";
 import styled from "styled-components";
-import Header from "../components/Header/Header";
 // Types -------------------------------------------------------------------------
 
 interface Props {}
 
 // Component ---------------------------------------------------------------------
-const Layout: NextPage<Props> = ({ children }) => {
-  return (
-    <Wrapper>
-      <Header />
-      {children}
-    </Wrapper>
-  );
+const FormLayout: NextPage<Props> = (props) => {
+  return <Wrapper {...props} />;
 };
 
-export default Layout;
+export default FormLayout;
 
 // Styled ------------------------------------------------------------------------
 
 const Wrapper = styled.div`
-  width: 1440px;
-  padding: 0 5%;
+  min-width: 300px;
   margin: auto;
+
+  form {
+    display: grid;
+    gap: 1rem;
+    justify-items: center;
+  }
 `;

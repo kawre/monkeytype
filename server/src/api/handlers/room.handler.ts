@@ -20,6 +20,7 @@ export type Collect = {
 
 const roomHandler = (io: Server, socket: Socket) => {
   const { userId, roomId } = socket.handshake.query as Params;
+  console.log(userId);
 
   // start count down
   const startCountDownInterval = () => {

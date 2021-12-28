@@ -1,6 +1,7 @@
 import { NextPage } from "next";
 import styled from "styled-components";
 import Button from "../components/Button";
+import Intro from "../components/Home/Intro";
 // Types -------------------------------------------------------------------------
 
 interface Props {}
@@ -9,7 +10,7 @@ interface Props {}
 const Home: NextPage<Props> = () => {
   return (
     <Wrapper>
-      <Button>Find Game</Button>
+      <Intro />
     </Wrapper>
   );
 };

@@ -2,9 +2,13 @@ import { NextPage } from "next";
 import styled from "styled-components";
 import { space, SpaceProps } from "styled-system";
 import { motion } from "framer-motion";
+import { DOMAttributes } from "react";
 // Types -------------------------------------------------------------------------
 
-interface Props extends SpaceProps {}
+interface Props extends SpaceProps, DOMAttributes<HTMLButtonElement> {
+  loading?: boolean;
+  disabled?: boolean;
+}
 
 // Component ---------------------------------------------------------------------
 const Button: NextPage<Props> = ({ children, ...props }) => {
@@ -15,7 +19,8 @@ const Button: NextPage<Props> = ({ children, ...props }) => {
         whileHover={{ translateY: "-0.625rem" }}
         whileTap={{ translateY: 0 }}
       >
-        {children}
+        {/* {children} */}
+        {props.loading ? "loading..." : children}
       </Floating>
     </Wrapper>
   );
@@ -25,7 +30,7 @@ export default Button;
 
 // Styled ------------------------------------------------------------------------
 
-const Wrapper = styled.button`
+const Wrapper = styled.button<Props>`
   display: flex;
   font-weight: 500;
   font-size: ${({ theme }) => theme.fontSizes.md};
@@ -34,6 +39,7 @@ const Wrapper = styled.button`
   margin-top: 0.375rem;
   border-radius: ${({ theme }) => theme.rounded.lg};
   cursor: pointer;
+  user-select: none;
 
   ${space}
 `;

@@ -1,13 +1,13 @@
 export const theme = {
   rounded: {
-    sm: "4px",
-    md: "8px",
+    sm: "0.25rem",
+    md: "0.375rem",
     lg: "0.5rem",
   },
-  shadow: {
-    sm: "0 0 9px #0000001A",
-    md: "",
-    lg: "",
+  sizes: {
+    sm: "0.5rem",
+    md: "1.25rem",
+    lg: "2rem",
   },
   colors: {
     main: "#4d586f",

@@ -6,12 +6,13 @@ import { connect } from "./utils/connect";
 import roomHandler from "./api/handlers/room.handler";
 import { routes } from "./api/routes/routes";
 import { deserializeUser } from "./api/middlewares/deserializeUser";
+import cors from "cors";
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "http://localhost:3000",
     credentials: true,
   },
 });
@@ -19,6 +20,12 @@ const io = new Server(server, {
 // middleware
 app.use(express.json());
 app.use(deserializeUser);
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 
 // socketio
 const onConnection = (socket: Socket) => {

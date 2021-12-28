@@ -1,26 +1,26 @@
 import { NextPage } from "next";
 import styled from "styled-components";
-import Header from "../components/Header/Header";
+import LoginForm from "../components/Forms/LoginForm";
 // Types -------------------------------------------------------------------------
 
 interface Props {}
 
 // Component ---------------------------------------------------------------------
-const Layout: NextPage<Props> = ({ children }) => {
+const LoginPage: NextPage<Props> = () => {
   return (
     <Wrapper>
-      <Header />
-      {children}
+      <LoginForm />
     </Wrapper>
   );
 };
 
-export default Layout;
+export default LoginPage;
 
 // Styled ------------------------------------------------------------------------
 
 const Wrapper = styled.div`
-  width: 1440px;
-  padding: 0 5%;
-  margin: auto;
+  display: flex;
+  min-height: 60vh;
+  justify-content: center;
+  align-items: center;
 `;
