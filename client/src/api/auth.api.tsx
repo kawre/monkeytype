@@ -24,8 +24,6 @@ export const useGetMe = () => {
 export const useCreateSession = () => {
   return useMutation(login, {
     onSuccess: (data: any) => {
-      localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("refreshToken", data.refreshToken);
       client.setQueryData("me", data);
     },
   });

@@ -1,7 +1,7 @@
 import { NextPage } from "next";
 import Link from "next/link";
 import styled from "styled-components";
-import { useMe } from "../../context/me.context";
+import { useAuth } from "../../context/auth.context";
 import Button from "../Button";
 import Logo from "../Logo";
 import Text from "../Text";
@@ -11,7 +11,9 @@ interface Props {}
 
 // Component ---------------------------------------------------------------------
 const Header: NextPage<Props> = () => {
-  const { me } = useMe();
+  const { me } = useAuth();
+  console.log(me);
+
   return (
     <Wrapper>
       <Logo />

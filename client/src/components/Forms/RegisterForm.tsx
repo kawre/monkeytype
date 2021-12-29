@@ -26,7 +26,6 @@ const RegisterForm: NextPage<Props> = () => {
           username: "",
         }}
         onSubmit={async (input) => {
-          console.log(input);
           const res = await mutateAsync(input);
           console.log(res);
         }}

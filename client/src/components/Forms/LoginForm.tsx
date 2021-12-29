@@ -26,8 +26,9 @@ const LoginForm: NextPage<Props> = () => {
         initialValues={{ email: "", password: "" }}
         onSubmit={async (input) => {
           try {
-            await mutateAsync(input);
-            router.push("/");
+            await mutateAsync(input, {
+              onSuccess: () => router.push("/"),
+            });
           } catch (e) {
             console.log(e);
           }

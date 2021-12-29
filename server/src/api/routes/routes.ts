@@ -16,5 +16,5 @@ export const routes = (app: Express) => {
   app.use("/api/sessions", sessionRouter);
 
   // me
-  app.get("/api/me", requireUser, meHandler);
+  app.get("/api/me", meHandler);
 };

@@ -25,11 +25,6 @@ const userStateSchema = new Schema({
   place: { type: Number, default: 0 },
 });
 
-userStateSchema.pre("save", function (next) {
-  console.log(this);
-  return next();
-});
-
 const roomSchema = new Schema(
   {
     users: [{ type: Types.ObjectId, ref: "User" }],

@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { get } from "lodash";
 import { createUser, findUser } from "../services/user.service";
 
 // create user
@@ -23,6 +24,5 @@ export const findUserHandler = async (req: Request, res: Response) => {
 
 // me
 export const meHandler = async (_: Request, res: Response) => {
-  console.log(res.locals.user);
-  return res.send(res.locals.user);
+  return res.send(get(res.locals, "user", null));
 };
