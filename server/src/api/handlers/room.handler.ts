@@ -14,80 +14,96 @@ type Params = {
 };
 
 export type Collect = {
-  wpm: number;
-  progess: number;
+  state: {
+    wpm: number;
+    progess: number;
+  };
+  roomId: string;
 };
 
 const roomHandler = (io: Server, socket: Socket) => {
-  const { userId, roomId } = socket.handshake.query as Params;
+  const { userId } = socket.handshake.query as Params;
 
   // start count down
-  const startCountDownInterval = () => {
-    let s = 10;
+  const startCountDownInterval = (roomId: string) => {
+    let s = 15;
 
     const countdown = setInterval(async () => {
       if (s === 3) {
-        updateRoom({ _id: roomId }, { active: false });
+        await updateRoom({ _id: roomId }, { active: false });
       }
 
       if (s > 0) {
-        socket.emit("countdown", s);
+        io.to(roomId).emit("room:countdown", s);
         s--;
       } else {
         clearInterval(countdown);
-        startRoomInterval();
+        startRoomInterval(roomId);
+        io.to(roomId).emit("room:start");
       }
     }, 1000);
   };
 
   // start room
-  const startRoomInterval = async () => {
-    socket.emit("start");
+  const startRoomInterval = (roomId: string) => {
+    let s = 1;
+    const intervalId = setInterval(async () => {
+      io.to(roomId).emit("room:time", s);
 
-    let s = 0;
-    const intervalId = setInterval(() => {
       if (s >= 300) {
-        socket.emit("end", true);
+        io.to(roomId).emit("room:end");
         clearInterval(intervalId);
       }
-      socket.emit("time", s);
+
+      s++;
+      io.to(roomId).emit("room:state", await getRoomState(roomId));
     }, 1000);
   };
 
+  const handleLeaveRoom = async (roomId: string) => {
+    try {
+      socket.leave(roomId);
+      io.to(roomId).emit("room:leave", "new user ");
+    } catch (e) {
+      socket.emit("error", "couldn't perform requested action");
+    }
+  };
+
   // join room
-  const handleJoinRoom = async () => {
-    await initRoomState(userId, roomId);
+  const handleJoinRoom = async (roomId: string) => {
+    try {
+      await initRoomState(userId, roomId);
+      socket.join(roomId);
+      socket.emit("joined", true);
+    } catch (e) {
+      socket.emit("error", "couldn't perform requested action");
+    }
   };
 
   // find room
   const handleFindRoom = async () => {
-    // @ts-ignore
-    const { room, isNew } = await findAndJoinRoom(userId);
-    if (!room) return socket.emit("error");
+    try {
+      const { room, isNew } = await findAndJoinRoom(userId);
+      if (isNew) {
+        startCountDownInterval(room._id.toString());
+      }
 
-    if (isNew) {
-      startCountDownInterval();
+      socket.emit("roomId", room._id);
+    } catch {
+      socket.emit("error", "couldn't perform requested action");
     }
-
-    socket.emit("roomId", room._id);
-    return socket.join(room._id);
   };
 
   // collect user state
-  const collectUserState = async (state: Collect) => {
-    await updateUserState(userId, roomId, state);
-  };
-
-  // emit room state
-  const emitUserState = async () => {
-    const state = await getRoomState(roomId);
-    socket.emit("state", state);
-    // io.sockets.in(roomId).emit("room:state", state);
+  const collectUserState = async ({ state, roomId }: Collect) => {
+    const currentState = await updateUserState(userId, roomId, state);
+    io.to(roomId).emit("room:state", currentState);
   };
 
   socket.on("room:user:state", collectUserState);
   socket.on("room:find", handleFindRoom);
   socket.on("room:join", handleJoinRoom);
+  socket.on("room:leave", handleLeaveRoom);
 };
 
 export default roomHandler;

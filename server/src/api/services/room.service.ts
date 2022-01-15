@@ -19,10 +19,11 @@ export const findRoom = async (query: FilterQuery<RoomDocument>) => {
 };
 
 // update session
-export const updateRoom = (
+export const updateRoom = async (
   query: FilterQuery<RoomDocument>,
   update: UpdateQuery<RoomDocument>
 ) => {
+  console.log({ query, update });
   return Room.updateOne(query, update);
 };
 
@@ -51,33 +52,26 @@ export const joinRoom = async ({
 };
 
 export const findAndJoinRoom = async (userId: string) => {
-  try {
-    const room = await findRoom({ active: true });
+  const room = await findRoom({ active: true });
 
-    if (room) {
-      await joinRoom({ roomId: room._id, userId });
-      return {
-        room,
-        isNew: false,
-      };
-    } else {
-      const newRoom = await createRoom(userId);
-      return {
-        room: newRoom,
-        isNew: true,
-      };
-    }
-  } catch {
+  if (room) {
+    await joinRoom({ roomId: room._id, userId });
     return {
-      room: null,
+      room,
       isNew: false,
+    };
+  } else {
+    const newRoom = await createRoom(userId);
+    return {
+      room: newRoom,
+      isNew: true,
     };
   }
 };
 
 export const initRoomState = async (userId: string, roomId: string) => {
   const room = await Room.findById(roomId);
-  if (!room) return null;
+  if (!room) return;
   room.state.push({ user: userId });
   return room.save();
 };
@@ -91,15 +85,13 @@ export const getRoomState = async (roomId: string) => {
 export const updateUserState = async (
   userId: string,
   roomId: string,
-  state: Collect
+  newState: Collect["state"]
 ) => {
   const room = await Room.findById(roomId);
   if (!room) return null;
-  const i = room.state.map((s) => s.user).indexOf(userId);
+  const i = room.state.map((s) => s.user.toString()).indexOf(userId);
 
-  room.state[i] = { ...state };
-
-  console.log({ state: room.state[i], userId });
+  room.state[i] = { ...room.state[i], ...newState, user: userId };
 
   await room.save();
   return room.state;
