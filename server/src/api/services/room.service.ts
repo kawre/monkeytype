@@ -1,6 +1,6 @@
 import { FilterQuery, UpdateQuery } from "mongoose";
 import { Collect } from "../handlers/room.handler";
-import Room, { RoomDocument, UserState } from "../models/room.model";
+import Room, { RoomDocument } from "../models/room.model";
 import { UserDocument } from "../models/user.model";
 
 export const createRoom = async (userId: UserDocument["_id"]) => {
@@ -23,7 +23,6 @@ export const updateRoom = async (
   query: FilterQuery<RoomDocument>,
   update: UpdateQuery<RoomDocument>
 ) => {
-  console.log({ query, update });
   return Room.updateOne(query, update);
 };
 

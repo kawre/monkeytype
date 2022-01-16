@@ -1,5 +1,4 @@
 import { Server, Socket } from "socket.io";
-import { UserState } from "../models/room.model";
 import {
   findAndJoinRoom,
   getRoomState,

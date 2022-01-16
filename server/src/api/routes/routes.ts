@@ -1,6 +1,5 @@
 import { Express } from "express";
 import { meHandler } from "../controllers/user.controller";
-import { requireUser } from "../middlewares/requireUser";
 import roomRouter from "./room.router";
 import sessionRouter from "./session.router";
 import userRouter from "./user.router";

@@ -1,22 +1,19 @@
-import { NextPage } from "next";
-import styled from "styled-components";
-import Button from "../components/Button";
-import Intro from "../components/Home/Intro";
-// Types -------------------------------------------------------------------------
+import Head from "next/head";
+import tw from "twin.macro";
 
-interface Props {}
-
-// Component ---------------------------------------------------------------------
-const Home: NextPage<Props> = () => {
+export default function Home() {
   return (
-    <Wrapper>
-      <Intro />
-    </Wrapper>
+    <>
+      <TailWind>elo</TailWind>
+      <p>2</p>
+    </>
   );
-};
+}
 
-export default Home;
+// const Button = styled.div`
+//   background: blue;
+// `;
 
-// Styled ------------------------------------------------------------------------
-
-const Wrapper = styled.div``;
+const TailWind = tw.button`
+  bg-gray-800
+`;
