@@ -9,7 +9,6 @@ import {
 
 type Params = {
   userId: string;
-  roomId: string;
 };
 
 export type Collect = {
@@ -62,7 +61,7 @@ const roomHandler = (io: Server, socket: Socket) => {
   const handleLeaveRoom = async (roomId: string) => {
     try {
       socket.leave(roomId);
-      io.to(roomId).emit("room:leave", "new user ");
+      io.to(roomId).emit("room:leave", "user left");
     } catch (e) {
       socket.emit("error", "couldn't perform requested action");
     }
