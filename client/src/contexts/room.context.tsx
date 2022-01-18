@@ -12,7 +12,7 @@ interface Context {
 
 const initialState = {
   stage: "countdown" as RoomState,
-  time: 15,
+  time: 0,
 };
 
 // Component ---------------------------------------------------------------------

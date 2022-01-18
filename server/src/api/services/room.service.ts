@@ -1,8 +1,9 @@
 import { FilterQuery, UpdateQuery } from "mongoose";
 import { Collect } from "../handlers/room.handler";
-import Room, { RoomDocument } from "../models/room.model";
+import Room, { RoomDocument, RoomState } from "../models/room.model";
 import Quote from "../models/quote.model";
 import { UserDocument } from "../models/user.model";
+import { omit } from "lodash";
 
 export const createRoom = async (userId: UserDocument["_id"]) => {
   const room = await Room.create({ users: [userId] });
@@ -68,15 +69,18 @@ export const findAndJoinRoom = async (userId: string) => {
 
 export const initRoomState = async (userId: string, roomId: string) => {
   const room = await Room.findById(roomId);
-  if (!room) return;
+  if (!room) throw new Error();
+
   room.state.users.push({ user: userId });
+
   return room.save();
 };
 
-export const getRoomState = async (roomId: string) => {
+export const getRoomUsersState = async (roomId: string) => {
   const room = await Room.findById(roomId);
   if (!room) return null;
-  return room.state;
+
+  return room.toJSON().state.users;
 };
 
 export const updateUserState = async (
@@ -91,10 +95,23 @@ export const updateUserState = async (
   room.state.users[i] = { ...room.state.users[i], ...newState, user: userId };
 
   await room.save();
-  return room.state;
+  return room.state.users;
 };
 
 export const createQuote = async (text: string) => {
   const quote = await Quote.create({ quote: text.trim() });
   return quote.toJSON();
+};
+
+export const updateRoomState = async (
+  state: Partial<RoomState>,
+  roomId: string
+) => {
+  const room = await Room.findById(roomId);
+  if (!room) return;
+
+  const payload = { ...room.toJSON().state.room, ...state };
+  room.state.room = payload;
+
+  room.save();
 };

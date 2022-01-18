@@ -1,9 +1,10 @@
 import { Server, Socket } from "socket.io";
 import {
   findAndJoinRoom,
-  getRoomState,
+  getRoomUsersState,
   initRoomState,
   updateRoom,
+  updateRoomState,
   updateUserState,
 } from "../services/room.service";
 
@@ -28,16 +29,18 @@ const roomHandler = (io: Server, socket: Socket) => {
 
     const countdown = setInterval(async () => {
       if (s === 3) {
-        await updateRoom({ _id: roomId }, { active: false });
+        updateRoom({ _id: roomId }, { active: false });
       }
 
       if (s > 0) {
         io.to(roomId).emit("room:countdown", s);
+        updateRoomState({ time: s }, roomId);
         s--;
       } else {
         clearInterval(countdown);
         startRoomInterval(roomId);
         io.to(roomId).emit("room:start");
+        updateRoomState({ stage: "playing", time: 0 }, roomId);
       }
     }, 1000);
   };
@@ -47,14 +50,16 @@ const roomHandler = (io: Server, socket: Socket) => {
     let s = 1;
     const intervalId = setInterval(async () => {
       io.to(roomId).emit("room:time", s);
+      updateRoomState({ time: s }, roomId);
 
       if (s >= 300) {
         io.to(roomId).emit("room:end");
+        updateRoomState({ stage: "postmatch" }, roomId);
         clearInterval(intervalId);
       }
 
       s++;
-      io.to(roomId).emit("room:state", await getRoomState(roomId));
+      io.to(roomId).emit("room:users:state", await getRoomUsersState(roomId));
     }, 1000);
   };
 
@@ -71,9 +76,9 @@ const roomHandler = (io: Server, socket: Socket) => {
   const handleJoinRoom = async (roomId: string) => {
     try {
       const room = await initRoomState(userId, roomId);
-      console.log({ room });
+      socket.emit("room:state", room.state.room);
       socket.join(roomId);
-    } catch (e) {
+    } catch {
       socket.emit("error", "couldn't perform requested action");
     }
   };
@@ -96,7 +101,7 @@ const roomHandler = (io: Server, socket: Socket) => {
   // collect user state
   const collectUserState = async ({ state, roomId }: Collect) => {
     const currentState = await updateUserState(userId, roomId, state);
-    io.to(roomId).emit("room:state", currentState);
+    io.to(roomId).emit("room:users:state", currentState);
   };
 
   // get state

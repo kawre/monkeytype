@@ -1,5 +1,6 @@
 import { NextPage } from "next";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import styled from "styled-components";
 import { useSocket } from "../contexts/socket.context";
 import Button from "./Button";
@@ -9,20 +10,27 @@ interface Props {}
 
 // Component ---------------------------------------------------------------------
 const Intro: NextPage<Props> = () => {
+  const [loading, setLoading] = useState(false);
+
   const router = useRouter();
   const { socket } = useSocket();
 
   const handleFindGame = () => {
-    socket.emit("room:find");
+    setLoading(true);
 
+    socket.emit("room:find");
     socket.on("room:id", (roomId: string) => {
       router.push(`/room/${roomId}`);
     });
+
+    setLoading(false);
   };
 
   return (
     <Wrapper>
-      <Button onClick={handleFindGame}>find game</Button>
+      <Button loading={loading} onClick={handleFindGame}>
+        find game
+      </Button>
     </Wrapper>
   );
 };

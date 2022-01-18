@@ -33,10 +33,13 @@ const userStateSchema = new Schema({
   place: { type: Number, default: 0 },
 });
 
-const roomStateSchema = new Schema({
-  stage: { type: String, default: "countdown" },
-  time: { type: Number, default: 15 },
-});
+const roomStateSchema = new Schema(
+  {
+    stage: { type: String, default: "countdown" },
+    time: { type: Number, default: 15 },
+  },
+  { _id: false }
+);
 
 const roomSchema = new Schema(
   {
@@ -55,10 +58,12 @@ const roomSchema = new Schema(
 roomSchema.pre("save", async function (next) {
   const room = this as RoomDocument;
 
-  const quote = await Quote.aggregate([{ $sample: { size: 1 } }]);
-  room.quote = quote[0]._id;
+  if (room.isNew) {
+    room.state.room = {} as RoomState;
 
-  room.state.room = {} as RoomState;
+    const quote = await Quote.aggregate([{ $sample: { size: 1 } }]);
+    room.quote = quote[0]._id;
+  }
 
   return next();
 });
