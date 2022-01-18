@@ -1,7 +1,6 @@
 import { NextPage } from "next";
 import { createContext, useContext, useEffect, useState } from "react";
 import io, { Socket } from "socket.io-client";
-// import { SOCKET_URL } from "../config/default";
 // Types -------------------------------------------------------------------------
 
 interface Context {

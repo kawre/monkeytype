@@ -15,7 +15,7 @@ const Intro: NextPage<Props> = () => {
   const handleFindGame = () => {
     socket.emit("room:find");
 
-    socket.on("roomId", (roomId: string) => {
+    socket.on("room:id", (roomId: string) => {
       router.push(`/room/${roomId}`);
     });
   };

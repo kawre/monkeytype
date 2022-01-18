@@ -1,15 +1,12 @@
 import { FilterQuery, UpdateQuery } from "mongoose";
 import { Collect } from "../handlers/room.handler";
 import Room, { RoomDocument } from "../models/room.model";
+import Quote from "../models/quote.model";
 import { UserDocument } from "../models/user.model";
 
 export const createRoom = async (userId: UserDocument["_id"]) => {
-  try {
-    const room = await Room.create({ users: [userId] });
-    return room.toJSON();
-  } catch (e) {
-    throw new Error(e);
-  }
+  const room = await Room.create({ users: [userId] });
+  return room.toJSON();
 };
 
 export const findRoom = async (query: FilterQuery<RoomDocument>) => {
@@ -61,6 +58,7 @@ export const findAndJoinRoom = async (userId: string) => {
     };
   } else {
     const newRoom = await createRoom(userId);
+    console.log({ newRoom });
     return {
       room: newRoom,
       isNew: true,
@@ -71,7 +69,7 @@ export const findAndJoinRoom = async (userId: string) => {
 export const initRoomState = async (userId: string, roomId: string) => {
   const room = await Room.findById(roomId);
   if (!room) return;
-  room.state.push({ user: userId });
+  room.state.users.push({ user: userId });
   return room.save();
 };
 
@@ -88,10 +86,15 @@ export const updateUserState = async (
 ) => {
   const room = await Room.findById(roomId);
   if (!room) return null;
-  const i = room.state.map((s) => s.user.toString()).indexOf(userId);
+  const i = room.state.users.map((s) => s.user.toString()).indexOf(userId);
 
-  room.state[i] = { ...room.state[i], ...newState, user: userId };
+  room.state.users[i] = { ...room.state.users[i], ...newState, user: userId };
 
   await room.save();
   return room.state;
+};
+
+export const createQuote = async (text: string) => {
+  const quote = await Quote.create({ quote: text.trim() });
+  return quote.toJSON();
 };

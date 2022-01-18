@@ -70,9 +70,9 @@ const roomHandler = (io: Server, socket: Socket) => {
   // join room
   const handleJoinRoom = async (roomId: string) => {
     try {
-      await initRoomState(userId, roomId);
+      const room = await initRoomState(userId, roomId);
+      console.log({ room });
       socket.join(roomId);
-      socket.emit("joined", true);
     } catch (e) {
       socket.emit("error", "couldn't perform requested action");
     }
@@ -82,11 +82,12 @@ const roomHandler = (io: Server, socket: Socket) => {
   const handleFindRoom = async () => {
     try {
       const { room, isNew } = await findAndJoinRoom(userId);
+
       if (isNew) {
         startCountDownInterval(room._id.toString());
       }
 
-      socket.emit("roomId", room._id);
+      socket.emit("room:id", room._id);
     } catch {
       socket.emit("error", "couldn't perform requested action");
     }
@@ -98,6 +99,13 @@ const roomHandler = (io: Server, socket: Socket) => {
     io.to(roomId).emit("room:state", currentState);
   };
 
+  // get state
+  // const emitRoomState = async (roomId: string) => {
+  //   const state = await getRoomState(roomId);
+  //   console.log(state);
+  // };
+
+  // socket.on("room:state", emitRoomState);
   socket.on("room:user:state", collectUserState);
   socket.on("room:find", handleFindRoom);
   socket.on("room:join", handleJoinRoom);

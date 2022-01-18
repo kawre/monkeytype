@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import styled from "styled-components";
 import Intro from "../components/Intro";
-import Layout from "../components/Layout";
+import Layout from "../Layout/Layout";
 import Text from "../components/Text";
 
 const Home: NextPage = () => {
