@@ -10,6 +10,9 @@ const Globals = createGlobalStyle`
   body {
     background-color: ${({ theme }) => theme.colors.background};
     font-family: ${({ theme }) => theme.font};
+
+    font-size: ${({ theme }) => theme.fontSizes.base};
+    color: ${({ theme }) => theme.colors.neutral[50]};
   }
 
   button, input, optgroup, select, textarea {

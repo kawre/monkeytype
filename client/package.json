@@ -8,9 +8,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "axios": "^0.25.0",
+    "axios-hooks": "^3.0.0",
+    "formik": "^2.2.9",
     "next": "12.0.8",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "react-icons": "^4.3.1",
+    "react-query": "^3.34.8",
     "react-spinners": "^0.11.0",
     "socket.io-client": "^4.4.1",
     "styled-components": "^5.3.3",

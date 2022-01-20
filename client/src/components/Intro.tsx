@@ -1,7 +1,9 @@
 import { NextPage } from "next";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import styled from "styled-components";
+import { useAuth } from "../contexts/auth.context";
 import { useSocket } from "../contexts/socket.context";
 import Button from "./Button";
 // Types -------------------------------------------------------------------------
@@ -10,6 +12,7 @@ interface Props {}
 
 // Component ---------------------------------------------------------------------
 const Intro: NextPage<Props> = () => {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
@@ -28,9 +31,17 @@ const Intro: NextPage<Props> = () => {
 
   return (
     <Wrapper>
-      <Button loading={loading} onClick={handleFindGame}>
-        find game
-      </Button>
+      {user ? (
+        <Button loading={loading} onClick={handleFindGame}>
+          find game
+        </Button>
+      ) : (
+        <Link href="/login">
+          <a>
+            <Button>Log In to play</Button>
+          </a>
+        </Link>
+      )}
     </Wrapper>
   );
 };
