@@ -2,7 +2,6 @@ import { Form, Formik } from "formik";
 import { NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import styled from "styled-components";
 import Button from "../components/Button";
 import Input from "../components/Form/Input";
 import Text, { Hyperlink } from "../components/Text";

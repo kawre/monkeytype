@@ -1,9 +1,8 @@
 import { NextPage } from "next";
 import { DOMAttributes } from "react";
 import { PulseLoader } from "react-spinners";
-import styled, { css, ThemedCssFunction } from "styled-components";
+import styled, { css } from "styled-components";
 import { SpaceProps } from "styled-system";
-import { theme } from "../styles/theme";
 // Types -------------------------------------------------------------------------
 
 interface Props extends SpaceProps, DOMAttributes<HTMLButtonElement> {

@@ -1,8 +1,6 @@
-import axios, { AxiosRequestConfig } from "axios";
-import { configure } from "axios-hooks";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import axios from "axios";
+import { createContext, useContext, useRef } from "react";
 import { useMutation, useQuery } from "react-query";
-import { BASE_URL } from "../config/config";
 import { User } from "../types/user";
 // Types -------------------------------------------------------------------------
 
@@ -20,7 +18,6 @@ export const useAuth = () => {
 // Component ---------------------------------------------------------------------
 const AuthProvider: React.FC = (props) => {
   const accessTokenRef = useRef<string>();
-  const [tokenExpires, setTokenExpires] = useState<string>();
 
   const getMe = async () =>
     await axios.get("/me").then((res) => res.data as Context["user"]);
