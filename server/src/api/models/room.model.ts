@@ -26,12 +26,15 @@ export interface RoomState {
   time: number;
 }
 
-const userStateSchema = new Schema({
-  user: { type: Types.ObjectId, ref: "User" },
-  wpm: { type: Number, default: 0 },
-  progress: { type: Number, default: 0 },
-  place: { type: Number, default: 0 },
-});
+const userStateSchema = new Schema(
+  {
+    user: { type: Types.ObjectId, ref: "User" },
+    wpm: { type: Number, default: 0 },
+    progress: { type: Number, default: 0 },
+    place: { type: Number, default: 0 },
+  },
+  { _id: false }
+);
 
 const roomStateSchema = new Schema(
   {

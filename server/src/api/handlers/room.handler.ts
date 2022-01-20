@@ -1,11 +1,11 @@
 import { Server, Socket } from "socket.io";
 import {
   findAndJoinRoom,
-  getRoomUsersState,
-  initRoomState,
+  joinRoom,
   updateRoom,
   updateRoomState,
   updateUserState,
+  usersPopulate,
 } from "../services/room.service";
 
 type Params = {
@@ -59,7 +59,8 @@ const roomHandler = (io: Server, socket: Socket) => {
       }
 
       s++;
-      io.to(roomId).emit("room:users:state", await getRoomUsersState(roomId));
+      const { users } = await usersPopulate(roomId);
+      io.to(roomId).emit("room:users:state", users);
     }, 1000);
   };
 
@@ -75,9 +76,12 @@ const roomHandler = (io: Server, socket: Socket) => {
   // join room
   const handleJoinRoom = async (roomId: string) => {
     try {
-      const room = await initRoomState(userId, roomId);
-      socket.emit("room:state", room.state.room);
+      await joinRoom(userId, roomId);
+
+      const state = await usersPopulate(roomId);
+
       socket.join(roomId);
+      io.to(roomId).emit("room:state", state);
     } catch {
       socket.emit("error", "couldn't perform requested action");
     }
@@ -100,17 +104,10 @@ const roomHandler = (io: Server, socket: Socket) => {
 
   // collect user state
   const collectUserState = async ({ state, roomId }: Collect) => {
-    const currentState = await updateUserState(userId, roomId, state);
-    io.to(roomId).emit("room:users:state", currentState);
+    const curr = await updateUserState(userId, roomId, state);
+    io.to(roomId).emit("room:users:state", curr);
   };
 
-  // get state
-  // const emitRoomState = async (roomId: string) => {
-  //   const state = await getRoomState(roomId);
-  //   console.log(state);
-  // };
-
-  // socket.on("room:state", emitRoomState);
   socket.on("room:user:state", collectUserState);
   socket.on("room:find", handleFindRoom);
   socket.on("room:join", handleJoinRoom);

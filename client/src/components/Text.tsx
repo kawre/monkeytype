@@ -16,6 +16,9 @@ export default Text;
 // Styled ------------------------------------------------------------------------
 
 const Wrapper = styled.p<Props>`
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
   ${typography}
   ${space}
 	${color}

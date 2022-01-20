@@ -1,12 +1,15 @@
 import { useRouter } from "next/router";
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useEffect, useReducer, useState } from "react";
 import { PulseLoader } from "react-spinners";
+import styled from "styled-components";
+import Tracks from "../../components/Room/Tracks";
 import Text from "../../components/Text";
 import RoomProvider, { useRoom } from "../../contexts/room.context";
 import { useSocket } from "../../contexts/socket.context";
 import Layout from "../../Layout/Layout";
 import { theme } from "../../styles/theme";
 import { Page } from "../../types/page";
+import { UserState } from "../../types/user";
 // Types -------------------------------------------------------------------------
 
 interface Props {}
@@ -16,10 +19,15 @@ const RoomPage: Page<Props> = () => {
   const { socket } = useSocket();
   const { roomId } = useRouter().query;
 
-  const [users, setUsers] = useState({});
+  const [users, setUsers] = useState([] as UserState[]);
+  const [stats, setStats] = useReducer(
+    (state: Stats, newState: Partial<Stats>) => ({
+      ...state,
+      ...newState,
+    }),
+    initStats
+  );
   const [wpm, setWpm] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [quote, setQuote] = useState("");
   const [loading, setLoading] = useState(true);
 
   const { state, dispatch } = useRoom();
@@ -34,12 +42,15 @@ const RoomPage: Page<Props> = () => {
     socket.on("room:time", (s) => dispatch({ time: s }));
     socket.on("room:start", () => dispatch({ time: 0, stage: "playing" }));
     socket.on("room:end", () => dispatch({ stage: "postmatch" }));
-    socket.on("room:state", (state) => {
-      dispatch({ ...state });
+    socket.on("room:state", ({ users, room }) => {
+      console.log({ users, room });
+      dispatch({ ...room });
+      setUsers(users);
       setLoading(false);
     });
-    socket.on("room:users:state", (state) => {
-      console.log(state);
+    socket.on("room:users:state", (users) => {
+      console.log(users);
+      setUsers(users);
     });
 
     return () => {
@@ -56,7 +67,9 @@ const RoomPage: Page<Props> = () => {
 
   return (
     <Layout title={`time: ${time} wpm: 52`}>
-      <Text>{roomId}</Text>
+      <Wrapper>
+        <Tracks users={users} />
+      </Wrapper>
     </Layout>
   );
 };
@@ -66,3 +79,16 @@ RoomPage.getLayout = function getLayout(page: ReactElement) {
 };
 
 export default RoomPage;
+
+const Wrapper = styled.div`
+  padding: 2rem;
+  background-color: ${({ theme }) => theme.colors.neutral[800]};
+  border-radius: ${({ theme }) => theme.rounded.xl};
+`;
+
+const initStats = {
+  wpm: 0,
+  progress: 0,
+};
+
+type Stats = typeof initStats;

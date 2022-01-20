@@ -1,12 +1,16 @@
 import { FilterQuery, UpdateQuery } from "mongoose";
 import { Collect } from "../handlers/room.handler";
-import Room, { RoomDocument, RoomState } from "../models/room.model";
 import Quote from "../models/quote.model";
+import Room, { RoomDocument, RoomState } from "../models/room.model";
 import { UserDocument } from "../models/user.model";
-import { omit } from "lodash";
 
 export const createRoom = async (userId: UserDocument["_id"]) => {
-  const room = await Room.create({ users: [userId] });
+  const room = await Room.create({});
+
+  room.users.push(userId);
+  room.state.users.push({ user: userId });
+  await room.save();
+
   return room.toJSON();
 };
 
@@ -24,42 +28,36 @@ export const updateRoom = async (
   return Room.updateOne(query, update);
 };
 
-export const joinRoom = async ({
-  roomId,
-  userId,
-}: {
-  roomId: RoomDocument["_id"];
-  userId: UserDocument["_id"];
-}) => {
-  try {
-    const room = await Room.findById(roomId);
+// export const joinRoom = async ({
+//   roomId,
+//   userId,
+// }: {
+//   roomId: RoomDocument["_id"];
+//   userId: UserDocument["_id"];
+// }) => {
+//   const room = await Room.findById(roomId);
 
-    if (
-      !room ||
-      room.users.some((u) => u.toString() === userId) ||
-      room.users.length > 5
-    )
-      throw new Error();
+//   if (
+//     !room ||
+//     room.users.some((u) => u.toString() === userId) ||
+//     room.users.length > 5
+//   )
+//     throw new Error();
 
-    room.users.push(userId);
-    return room.save();
-  } catch (e: any) {
-    return null;
-  }
-};
+//   room.users.push(userId);
+//   return room.save();
+// };
 
 export const findAndJoinRoom = async (userId: string) => {
   const room = await findRoom({ active: true });
 
   if (room) {
-    await joinRoom({ roomId: room._id, userId });
     return {
       room,
       isNew: false,
     };
   } else {
     const newRoom = await createRoom(userId);
-    console.log({ newRoom });
     return {
       room: newRoom,
       isNew: true,
@@ -67,13 +65,19 @@ export const findAndJoinRoom = async (userId: string) => {
   }
 };
 
-export const initRoomState = async (userId: string, roomId: string) => {
+export const joinRoom = async (userId: string, roomId: string) => {
   const room = await Room.findById(roomId);
   if (!room) throw new Error();
 
-  room.state.users.push({ user: userId });
+  if (!room.users.find((u) => u.toString() === userId)) {
+    console.log("elo");
+    room.users.push(userId);
+    const users = room.state.users;
+    users.push({ user: userId });
+    await room.save();
+  }
 
-  return room.save();
+  return room;
 };
 
 export const getRoomUsersState = async (roomId: string) => {
@@ -114,4 +118,14 @@ export const updateRoomState = async (
   room.state.room = payload;
 
   room.save();
+};
+
+export const usersPopulate = async (roomId: string) => {
+  const room = await Room.findById(roomId).populate(
+    "state.users.user",
+    "username"
+  );
+  if (!room) throw new Error();
+
+  return room.state;
 };
