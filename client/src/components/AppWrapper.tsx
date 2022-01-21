@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
 import { ThemeProvider } from "styled-components";
 import AuthProvider from "../contexts/auth.context";
 import SocketProvider from "../contexts/socket.context";
@@ -9,23 +10,24 @@ import { Page } from "../types/page";
 
 interface Props {}
 
+const client = new QueryClient();
+
 // Component ---------------------------------------------------------------------
 const AppWrapper: Page<Props> = ({ children }) => {
-  const client = new QueryClient();
-
   return (
-    <ThemeProvider theme={theme}>
-      <Globals />
-      {/*  */}
-      <QueryClientProvider client={client}>
+    <QueryClientProvider client={client}>
+      <ReactQueryDevtools initialIsOpen={true} />
+      <ThemeProvider theme={theme}>
+        <Globals />
+        {/*  */}
         <AuthProvider>
           <SocketProvider>
             <>{children}</>
           </SocketProvider>
         </AuthProvider>
-      </QueryClientProvider>
-      {/*  */}
-    </ThemeProvider>
+        {/*  */}
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 };
 

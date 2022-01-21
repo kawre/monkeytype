@@ -31,17 +31,19 @@ const Intro: NextPage<Props> = () => {
 
   return (
     <Wrapper>
-      {user ? (
-        <Button loading={loading} onClick={handleFindGame}>
-          find game
-        </Button>
-      ) : (
-        <Link href="/login">
-          <a>
-            <Button>Log In to play</Button>
-          </a>
-        </Link>
-      )}
+      <BtnWrapper>
+        {user ? (
+          <Button isLoading={loading} onClick={handleFindGame}>
+            find game
+          </Button>
+        ) : (
+          <Link href="/login">
+            <a>
+              <Button>Log In to play</Button>
+            </a>
+          </Link>
+        )}
+      </BtnWrapper>
     </Wrapper>
   );
 };
@@ -54,4 +56,12 @@ const Wrapper = styled.div`
   height: 22.5rem;
   background-color: ${({ theme }) => theme.colors.neutral[800]};
   border-radius: ${({ theme }) => theme.rounded.xl};
+  position: relative;
+`;
+
+const BtnWrapper = styled.div`
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  margin: 2rem;
 `;

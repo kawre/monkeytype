@@ -17,20 +17,18 @@ const SocketProvider: NextPage = (props) => {
 
   useEffect(() => {
     if (!user) return;
-    setSocket(
-      io("http://localhost:1337", {
-        query: { userId: user._id },
-      })
-    );
+    const skt = io("http://localhost:1337", {
+      query: { userId: user._id },
+    });
 
+    setSocket(skt);
     return () => {
-      socket.disconnect();
+      skt.disconnect();
     };
   }, [user]);
 
   const value = { socket };
 
-  // if (Object.keys(socket).length === 0) return null;
   return <SocketContext.Provider value={value} {...props} />;
 };
 

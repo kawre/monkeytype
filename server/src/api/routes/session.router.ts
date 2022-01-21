@@ -4,6 +4,7 @@ import {
   createSessionHandler,
   deleteSessionHandler,
   getSessionHandler,
+  logoutSessionHandler,
 } from "../controllers/session.controller";
 import { requireUser } from "../middlewares/requireUser";
 import { createSessionSchema } from "../validations/session.validation";
@@ -18,5 +19,8 @@ sessions.get("/", requireUser, getSessionHandler);
 
 // delete session
 sessions.delete("/", requireUser, deleteSessionHandler);
+
+// logout session
+sessions.post("/logout", requireUser, logoutSessionHandler);
 
 export default sessions;

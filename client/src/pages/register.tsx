@@ -1,43 +1,47 @@
-import { Form, Formik } from "formik";
+import { Formik } from "formik";
 import { NextPage } from "next";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
+import styled from "styled-components";
 import Button from "../components/Button";
 import Input from "../components/Form/Input";
 import Text, { Hyperlink } from "../components/Text";
 import { useAuth } from "../contexts/auth.context";
-import FormLayout, { SubmitFooter } from "../Layout/FormLayout";
+import FormLayout, { Form, SubmitFooter } from "../Layout/FormLayout";
 import Layout from "../Layout/Layout";
 // Types -------------------------------------------------------------------------
 
 interface Props {}
 
 // Component ---------------------------------------------------------------------
-const login: NextPage<Props> = () => {
-  const { user } = useAuth();
-  const router = useRouter();
-  const { login } = useAuth();
+const register: NextPage<Props> = () => {
+  const { register } = useAuth();
 
   return (
-    <Layout title="Log In">
-      <FormLayout title="Login">
+    <Layout title="Register">
+      <FormLayout title="Sign Up">
         <Formik
-          initialValues={{ email: "", password: "" }}
+          initialValues={{
+            username: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+          }}
           onSubmit={async (input, { setErrors }) => {
-            await login(input);
-            router.push("/");
+            const res = await register(input);
+            console.log(res);
           }}
         >
           {({ isSubmitting }) => (
             <Form>
+              <Input name="username" placeholder="Username" />
               <Input name="email" placeholder="Email" />
-              <Input name="password" type="password" placeholder="Password" />
+              <Input name="password" placeholder="Password" />
+              <Input name="confirmPassword" placeholder="Confirm Password" />
               <SubmitFooter>
                 <Text mb={2} fontSize={"sm"} textColor={"neutral.500"}>
-                  Don't have an account?{" "}
-                  <Link href={"/register"}>
-                    <Hyperlink as={"span"}>Sign Up</Hyperlink>
+                  Already have an account?{" "}
+                  <Link href={"/login"}>
+                    <Hyperlink as={"span"}>Log In</Hyperlink>
                   </Link>
                 </Text>
                 <Button isLoading={isSubmitting}>Submit</Button>
@@ -50,4 +54,8 @@ const login: NextPage<Props> = () => {
   );
 };
 
-export default login;
+export default register;
+
+// Styled ------------------------------------------------------------------------
+
+const Wrapper = styled.div``;

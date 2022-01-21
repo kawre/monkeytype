@@ -8,7 +8,7 @@ export interface UserState {
   place: number;
 }
 
-export interface User {
+export interface IUser {
   _id: string;
   username: string;
   email: string;
@@ -18,3 +18,5 @@ export interface User {
   iat: number;
   exp: number;
 }
+
+export type User = IUser | null | undefined;

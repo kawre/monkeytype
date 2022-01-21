@@ -1,12 +1,11 @@
+import { useField } from "formik";
 import React, { InputHTMLAttributes } from "react";
-import styled from "styled-components";
-import { useField, ErrorMessage } from "formik";
 import { FaExclamationTriangle } from "react-icons/fa";
-import { useEffect } from "react";
+import styled from "styled-components";
 // Types -------------------------------------------------------------------------
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
-  name: "username" | "email" | "password";
+  name: "username" | "email" | "password" | "confirmPassword";
   label?: string;
 }
 

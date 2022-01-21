@@ -1,12 +1,15 @@
-import axios from "axios";
-import { createContext, useContext, useRef } from "react";
-import { useMutation, useQuery } from "react-query";
+import { AxiosResponse } from "axios";
+import { createContext, useContext } from "react";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { createSession, createUser, getMe, useLogout } from "../api/api";
 import { User } from "../types/user";
 // Types -------------------------------------------------------------------------
 
 interface Context {
   login: (input: any) => Promise<void>;
-  user: User | null | undefined;
+  logout: () => Promise<AxiosResponse<any, any>>;
+  user: User;
+  register: (input: any) => Promise<User>;
 }
 
 const AuthContext = createContext<Context>(null!);
@@ -17,32 +20,32 @@ export const useAuth = () => {
 
 // Component ---------------------------------------------------------------------
 const AuthProvider: React.FC = (props) => {
-  const accessTokenRef = useRef<string>();
+  const { data: user, refetch } = useQuery("me", getMe);
+  const client = useQueryClient();
 
-  const getMe = async () =>
-    await axios.get("/me").then((res) => res.data as Context["user"]);
-
-  const { data: user } = useQuery("me", getMe);
-
-  const createSession = async (input: any) => {
-    const { data } = await axios.post("/sessions", input);
-    return data;
-  };
-
-  const loginQuery = useMutation(createSession, {
-    onSuccess: ({ accessToken }) => {
-      accessTokenRef.current = accessToken;
-      // setTokenExpires(data.)
+  const loginMutation = useMutation(createSession, {
+    onSuccess: async () => {
+      await refetch();
     },
   });
 
-  const login = async (input: any) => {
-    await loginQuery.mutateAsync(input);
-  };
+  const logoutMutation = useMutation(useLogout, {
+    onSuccess: () => {
+      client.invalidateQueries("me");
+    },
+  });
+
+  const registerMutation = useMutation(createUser, {
+    onSuccess: async () => {
+      await refetch();
+    },
+  });
 
   const value = {
     user,
-    login,
+    login: (input: any) => loginMutation.mutateAsync(input),
+    logout: () => logoutMutation.mutateAsync(),
+    register: (input: any) => registerMutation.mutateAsync(input),
   };
 
   if (user === undefined) return null;

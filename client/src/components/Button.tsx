@@ -6,7 +6,7 @@ import { SpaceProps } from "styled-system";
 // Types -------------------------------------------------------------------------
 
 interface Props extends SpaceProps, DOMAttributes<HTMLButtonElement> {
-  loading?: boolean;
+  isLoading?: boolean;
   variant?: "base" | "ghost";
 }
 
@@ -14,14 +14,12 @@ interface Props extends SpaceProps, DOMAttributes<HTMLButtonElement> {
 const Button: NextPage<Props> = ({ children, ...props }) => {
   return (
     <Wrapper {...props}>
-      <>
-        {children}
-        {props.loading && (
-          <LoaderContainer>
-            <PulseLoader size={12} color={"inherit"} />
-          </LoaderContainer>
-        )}
-      </>
+      {children}
+      {props.isLoading && (
+        <LoaderContainer>
+          <PulseLoader size={12} color={"inherit"} />
+        </LoaderContainer>
+      )}
     </Wrapper>
   );
 };
@@ -52,11 +50,13 @@ const Wrapper = styled.button<Props>`
   font-weight: 600;
   text-transform: uppercase;
   position: relative;
+  display: flex;
+  align-items: center;
 
   ${({ variant = "base" }) => btnVariants[variant]}
 
-  ${({ loading }) =>
-    loading &&
+  ${({ isLoading }) =>
+    isLoading &&
     css`
       color: transparent;
     `};

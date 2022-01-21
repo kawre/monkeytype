@@ -73,3 +73,14 @@ export const deleteSessionHandler = async (_: Request, res: Response) => {
     refreshToken: null,
   });
 };
+
+// logout session
+export const logoutSessionHandler = async (_: Request, res: Response) => {
+  const sessionId = res.locals.user._id;
+  await updateSession({ _id: sessionId }, { valid: false });
+
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
+
+  return res.sendStatus(200);
+};

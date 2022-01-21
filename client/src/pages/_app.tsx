@@ -13,8 +13,6 @@ type AppPropsWithLayout = AppProps & {
 axios.interceptors.request.use(
   (config: AxiosRequestConfig): AxiosRequestConfig => {
     config.baseURL = BASE_URL; // base url for your api.
-    // @ts-ignore
-    // config.headers.authorization = `Bearer ${accessTokenRef.current}`;
     config.withCredentials = true;
     return config;
   }

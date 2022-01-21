@@ -19,8 +19,8 @@ const Tracks: NextPage<Props> = ({ users }) => {
       <Stats>
         <Text>{state.time}</Text>
       </Stats>
-      {users.map((u) => (
-        <Track user={u} />
+      {users.map((u, i) => (
+        <Track key={i} user={u} />
       ))}
     </Wrapper>
   );
