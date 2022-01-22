@@ -15,8 +15,6 @@ interface Props {}
 
 // Component ---------------------------------------------------------------------
 const login: NextPage<Props> = () => {
-  const { user } = useAuth();
-  const router = useRouter();
   const { login } = useAuth();
 
   return (
@@ -25,13 +23,12 @@ const login: NextPage<Props> = () => {
         <Formik
           initialValues={{ email: "", password: "" }}
           onSubmit={async (input, { setErrors }) => {
-            await login(input);
-            router.push("/");
+            const res = await login(input);
           }}
         >
           {({ isSubmitting }) => (
             <Form>
-              <Input name="email" placeholder="Email" />
+              <Input name="email" placeholder="Email" type="email" />
               <Input name="password" type="password" placeholder="Password" />
               <SubmitFooter>
                 <Text mb={2} fontSize={"sm"} textColor={"neutral.500"}>

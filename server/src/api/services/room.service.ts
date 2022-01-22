@@ -70,14 +70,13 @@ export const joinRoom = async (userId: string, roomId: string) => {
   if (!room) throw new Error();
 
   if (!room.users.find((u) => u.toString() === userId)) {
-    console.log("elo");
     room.users.push(userId);
     const users = room.state.users;
     users.push({ user: userId });
     await room.save();
   }
 
-  return room;
+  return room.populate("quote");
 };
 
 export const getRoomUsersState = async (roomId: string) => {

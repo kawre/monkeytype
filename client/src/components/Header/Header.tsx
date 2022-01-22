@@ -38,9 +38,9 @@ const Header: NextPage<Props> = () => {
               <Text>{user.username}</Text>
             </Button>
             <Text mx={2}>|</Text>
-            <Button variant="ghost" onClick={logout}>
+            <Button textColor={"teal.500"} variant="ghost" onClick={logout}>
               <Icon mr={2} as={FaSignOutAlt} />
-              Sign Out
+              <Text>Sign Out</Text>
             </Button>
           </>
         ) : (
@@ -50,12 +50,14 @@ const Header: NextPage<Props> = () => {
             </Button>
             <Text mx={2}>|</Text>
             <Button variant="ghost">
-              <Icon mr={2} as={FaRegUserCircle} />
+              <Icon as={FaRegUserCircle} />
             </Button>
             <Text mx={2}>|</Text>
             <Link href="/login">
               <a>
-                <Button>Log In</Button>
+                <Button textColor={"teal.500"} variant="ghost">
+                  Log In
+                </Button>
               </a>
             </Link>
           </>

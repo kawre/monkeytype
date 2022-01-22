@@ -23,7 +23,7 @@ const AuthProvider: React.FC = (props) => {
   const { data: user, refetch } = useQuery("me", getMe);
   const client = useQueryClient();
 
-  const loginMutation = useMutation(createSession, {
+  const sessionMutation = useMutation(createSession, {
     onSuccess: async () => {
       await refetch();
     },
@@ -36,14 +36,14 @@ const AuthProvider: React.FC = (props) => {
   });
 
   const registerMutation = useMutation(createUser, {
-    onSuccess: async () => {
-      await refetch();
+    onSuccess: async (_, { password, email }) => {
+      sessionMutation.mutateAsync({ email, password });
     },
   });
 
   const value = {
     user,
-    login: (input: any) => loginMutation.mutateAsync(input),
+    login: (input: any) => sessionMutation.mutateAsync(input),
     logout: () => logoutMutation.mutateAsync(),
     register: (input: any) => registerMutation.mutateAsync(input),
   };

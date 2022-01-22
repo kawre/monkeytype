@@ -8,7 +8,11 @@ export const createUser = async (input: UserDocument) => {
     const user = await User.create(input);
     return omitPassword(user.toJSON());
   } catch (e) {
-    throw new Error(e);
+    if (e.code === 11000) {
+      const at = Object.keys(e.keyValue)[0];
+      throw new Error(`${at} already taken`);
+    }
+    throw new Error(e.message);
   }
 };
 

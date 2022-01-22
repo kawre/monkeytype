@@ -1,5 +1,4 @@
 import { Express } from "express";
-import { createQuoteHandler } from "../controllers/room.controller";
 import { meHandler } from "../controllers/user.controller";
 import roomRouter from "./room.router";
 import sessionRouter from "./session.router";

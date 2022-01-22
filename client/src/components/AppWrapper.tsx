@@ -16,7 +16,7 @@ const client = new QueryClient();
 const AppWrapper: Page<Props> = ({ children }) => {
   return (
     <QueryClientProvider client={client}>
-      <ReactQueryDevtools initialIsOpen={true} />
+      <ReactQueryDevtools initialIsOpen={false} />
       <ThemeProvider theme={theme}>
         <Globals />
         {/*  */}

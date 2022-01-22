@@ -76,11 +76,12 @@ const roomHandler = (io: Server, socket: Socket) => {
   // join room
   const handleJoinRoom = async (roomId: string) => {
     try {
-      await joinRoom(userId, roomId);
+      const room = await joinRoom(userId, roomId);
 
       const state = await usersPopulate(roomId);
 
       socket.join(roomId);
+      socket.emit("room:quote", (room.quote as any).quote);
       io.to(roomId).emit("room:state", state);
     } catch {
       socket.emit("error", "couldn't perform requested action");

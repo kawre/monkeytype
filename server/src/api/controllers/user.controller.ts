@@ -7,8 +7,8 @@ export const createUserHandler = async (req: Request, res: Response) => {
   try {
     const user = await createUser(req.body);
     return res.send(user);
-  } catch (e: any) {
-    return res.status(409).send(e.message);
+  } catch (e) {
+    return res.status(409).send([e.message]);
   }
 };
 

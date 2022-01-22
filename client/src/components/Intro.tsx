@@ -24,9 +24,8 @@ const Intro: NextPage<Props> = () => {
     socket.emit("room:find");
     socket.on("room:id", (roomId: string) => {
       router.push(`/room/${roomId}`);
+      setLoading(false);
     });
-
-    setLoading(false);
   };
 
   return (

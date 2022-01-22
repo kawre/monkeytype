@@ -15,5 +15,9 @@ export const createSession = async (input: any) => {
 export const useLogout = async () =>
   await axios.post("/sessions/logout").then((res) => res.data);
 
-export const createUser = async (input: any) =>
-  await axios.post("/users", input).then((res) => res.data as User);
+export const createUser = async (input: any) => {
+  return axios
+    .post("/users", input)
+    .catch((err) => err.response)
+    .then((res) => res.data);
+};

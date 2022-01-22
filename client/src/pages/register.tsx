@@ -28,15 +28,30 @@ const register: NextPage<Props> = () => {
           }}
           onSubmit={async (input, { setErrors }) => {
             const res = await register(input);
-            console.log(res);
+
+            if (Array.isArray(res)) {
+              const hash: Record<string, string> = {};
+
+              res.forEach((err: string) => {
+                const key = err.split(" ")[0];
+                const msg = err;
+                hash[key] = msg;
+              });
+
+              return setErrors(hash);
+            }
           }}
         >
           {({ isSubmitting }) => (
             <Form>
-              <Input name="username" placeholder="Username" />
-              <Input name="email" placeholder="Email" />
-              <Input name="password" placeholder="Password" />
-              <Input name="confirmPassword" placeholder="Confirm Password" />
+              <Input name="username" placeholder="Username" type="text" />
+              <Input name="email" placeholder="Email" type="email" />
+              <Input name="password" placeholder="Password" type="password" />
+              <Input
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                type="password"
+              />
               <SubmitFooter>
                 <Text mb={2} fontSize={"sm"} textColor={"neutral.500"}>
                   Already have an account?{" "}

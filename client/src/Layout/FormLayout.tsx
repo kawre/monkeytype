@@ -2,6 +2,8 @@ import { NextPage } from "next";
 import styled from "styled-components";
 import Text from "../components/Text";
 import { Form as elo } from "formik";
+import { useAuth } from "../contexts/auth.context";
+import { useRouter } from "next/router";
 // Types -------------------------------------------------------------------------
 
 interface Props {
@@ -10,9 +12,13 @@ interface Props {
 
 // Component ---------------------------------------------------------------------
 const FormLayout: NextPage<Props> = ({ children, title }) => {
+  const router = useRouter();
+  const { user } = useAuth();
+
+  if (user) router.push("/");
   return (
     <Wrapper>
-      <Text mb={3} fontSize={"5xl"} fontWeight={600}>
+      <Text lineHeight={1} fontSize={"5xl"} fontWeight={600}>
         {title}
       </Text>
       <FormContainer>{children}</FormContainer>
