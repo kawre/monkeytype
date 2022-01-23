@@ -1,23 +1,14 @@
 import "dotenv/config";
 import cfg from "config";
+import cfg2 from "../config/default";
 
-interface Config {
-  port: number;
-  dbUri: string;
-  salt: number;
-  corsOrigin: string;
-  accessTokenTtl: string;
-  refreshTokenTtl: string;
-  accessTokenPublicKey: string;
-  accessTokenPrivateKey: string;
-  refreshTokenPublicKey: string;
-  refreshTokenPrivateKey: string;
-}
+type Cfg = typeof cfg2;
 
-const config: Config = {
+const config: Cfg = {
   port: cfg.get("port"),
   corsOrigin: cfg.get("corsOrigin"),
-  salt: cfg.get("saltWorkFactor"),
+  countdownDuration: cfg.get("countdownDuration"),
+  salt: cfg.get("salt"),
   dbUri: cfg.get("dbUri"),
   accessTokenPublicKey: cfg.get("accessTokenPublicKey"),
   accessTokenPrivateKey: cfg.get("accessTokenPrivateKey"),

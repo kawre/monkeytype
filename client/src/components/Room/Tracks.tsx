@@ -23,4 +23,8 @@ export default Tracks;
 
 // Styled ------------------------------------------------------------------------
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2rem;
+`;

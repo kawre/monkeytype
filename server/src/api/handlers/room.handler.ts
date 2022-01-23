@@ -1,4 +1,5 @@
 import { Server, Socket } from "socket.io";
+import config from "../../config";
 import {
   findAndJoinRoom,
   joinRoom,
@@ -25,7 +26,7 @@ const roomHandler = (io: Server, socket: Socket) => {
 
   // start count down
   const startCountDownInterval = (roomId: string) => {
-    let s = 15;
+    let s = config.countdownDuration;
 
     const countdown = setInterval(async () => {
       if (s === 3) {
@@ -105,6 +106,7 @@ const roomHandler = (io: Server, socket: Socket) => {
 
   // collect user state
   const collectUserState = async ({ state, roomId }: Collect) => {
+    console.log(state);
     const curr = await updateUserState(userId, roomId, state);
     io.to(roomId).emit("room:users:state", curr);
   };

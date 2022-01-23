@@ -1,35 +1,91 @@
 import { NextPage } from "next";
-import { useState } from "react";
-import styled from "styled-components";
+import { useRouter } from "next/router";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
+import styled, { css } from "styled-components";
 import { useRoom } from "../../contexts/room.context";
+import { useSocket } from "../../contexts/socket.context";
 import { fmtMSS } from "../../utils/fmtMSS";
 import Text from "../Text";
 // Types -------------------------------------------------------------------------
 
 interface Props {
   quote: string;
-  wpm: number;
 }
 
 // Component ---------------------------------------------------------------------
-const Panel: NextPage<Props> = ({ quote, wpm }) => {
+const Panel: NextPage<Props> = ({ quote }) => {
+  const { roomId } = useRouter().query;
+  const { socket } = useSocket();
   const [idx, setIdx] = useState(0);
   const [words] = useState(quote.split(" "));
+  const [input, setInput] = useState("");
 
-  const { state } = useRoom();
-  const { time } = state;
+  // ref
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const { state, setStats, stats } = useRoom();
+  const { time, stage } = state;
+  const { wpm } = stats;
+
+  socket.on("room:start", () => {
+    if (inputRef.current) inputRef.current.focus();
+  });
+
+  const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+    const oldVal = val.slice(0, -1);
+    const key = val[val.length - 1];
+
+    if (key === " " && words[idx] === oldVal) {
+      val = "";
+      setIdx((i) => i + 1);
+    }
+
+    e.target.value = val;
+    setInput(val);
+  };
+
+  // calculate wpm
+  useEffect(() => {
+    if (stage !== "playing") return;
+    const minute = time / 60;
+    const correct = words.slice(0, idx === 0 ? idx : idx - 1).join("").length;
+    const wpm = Math.round(correct / 5 / minute);
+    const progress = Math.round((idx / words.length) * 100);
+
+    if (!Number.isInteger(wpm)) setStats({ wpm: 0, progress });
+    else setStats({ wpm, progress });
+  }, [time, input, idx]);
+
+  useEffect(() => {
+    if (idx === 0) return;
+    socket.emit("room:user:state", { state: stats, roomId });
+  }, [idx, time, stats]);
 
   return (
     <>
       <Words>
         {words.map((w, i) => {
           const letters = w.split("");
-          let active = false;
-          if (i === idx) active = true;
+          const active = i === idx ? true : false;
+
           return (
             <Word active={active} key={i}>
               {letters.map((l, j) => {
-                return <Letter key={j}>{l}</Letter>;
+                let state = "";
+
+                if (active && j < input.length) {
+                  if (input[j] === l) state = "correct";
+                  else state = "incorrect";
+                } else if (i < idx) {
+                  state = "correct";
+                }
+
+                return (
+                  <Letter state={state} key={j}>
+                    {l}
+                  </Letter>
+                );
               })}
             </Word>
           );
@@ -38,10 +94,14 @@ const Panel: NextPage<Props> = ({ quote, wpm }) => {
       <InputWrapper>
         <Input
           type="text"
+          autoFocus={true}
+          maxLength={words[idx].length + 10}
+          ref={inputRef}
           autoComplete="off"
           autoCapitalize="off"
           autoCorrect="off"
-          onChange={(e) => console.log(e)}
+          disabled={stage === "countdown"}
+          onChange={handleInput}
         />
         <Blocks>
           <Block>
@@ -51,7 +111,9 @@ const Panel: NextPage<Props> = ({ quote, wpm }) => {
             <Text as={"span"}>WPM</Text>
           </Block>
           <Block>
-            <Text fontSize={"2xl"}>{fmtMSS(time)}</Text>
+            <Text fontSize={"2xl"}>
+              {fmtMSS(stage === "countdown" ? time : 300 - time)}
+            </Text>
           </Block>
         </Blocks>
       </InputWrapper>
@@ -83,11 +145,26 @@ const Word = styled.div<{ active: boolean }>`
     active ? theme.colors.teal[500] : "transparent"}; ;
 `;
 
-const Letter = styled.span`
+type LetterType = {
+  state?: string;
+};
+
+const letterStyle: Record<string, any> = {
+  correct: css`
+    color: ${({ theme }) => theme.colors.teal[500]};
+  `,
+  incorrect: css`
+    color: ${({ theme }) => theme.colors.red[400]};
+  `,
+};
+
+const Letter = styled.span<LetterType>`
   border-bottom-style: solid;
   border-bottom-width: 0.1em;
   border-bottom-color: inherit;
   display: inline-block;
+
+  ${({ state = "" }) => letterStyle[state]};
 `;
 
 const InputWrapper = styled.div`
@@ -109,6 +186,10 @@ const Input = styled.input`
 
   &:focus {
     border-color: ${({ theme }) => theme.colors.teal[500]};
+  }
+
+  &:disabled {
+    cursor: not-allowed;
   }
 `;
 

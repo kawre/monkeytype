@@ -1,4 +1,5 @@
 import { Document, model, Schema, Types } from "mongoose";
+import config from "../../config";
 import Quote from "./quote.model";
 import { UserDocument } from "./user.model";
 
@@ -39,7 +40,7 @@ const userStateSchema = new Schema(
 const roomStateSchema = new Schema(
   {
     stage: { type: String, default: "countdown" },
-    time: { type: Number, default: 15 },
+    time: { type: Number, default: config.countdownDuration },
   },
   { _id: false }
 );

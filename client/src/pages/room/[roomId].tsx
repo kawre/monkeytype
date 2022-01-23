@@ -20,18 +20,10 @@ const RoomPage: Page<Props> = () => {
   const { roomId } = useRouter().query;
 
   const [users, setUsers] = useState([] as UserState[]);
-  const [stats, setStats] = useReducer(
-    (state: Stats, newState: Partial<Stats>) => ({
-      ...state,
-      ...newState,
-    }),
-    initStats
-  );
-  const [wpm, setWpm] = useState(0);
   const [loading, setLoading] = useState(true);
   const [quote, setQuote] = useState("");
 
-  const { state, dispatch } = useRoom();
+  const { state, dispatch, stats } = useRoom();
   const { time } = state;
 
   useEffect(() => {
@@ -55,6 +47,7 @@ const RoomPage: Page<Props> = () => {
 
     return () => {
       socket.emit("room:leave", roomId);
+      // socket.disconnect();
     };
   }, [roomId]);
 
@@ -68,10 +61,10 @@ const RoomPage: Page<Props> = () => {
     );
 
   return (
-    <Layout title={`time: ${time} wpm: 52`}>
+    <Layout title={`time: ${time} wpm: ${stats.wpm}`}>
       <Wrapper>
         <Tracks users={users} />
-        <Panel wpm={wpm} quote={quote} />
+        <Panel quote={quote} />
       </Wrapper>
     </Layout>
   );
@@ -85,11 +78,6 @@ export default RoomPage;
 
 const Wrapper = styled.div``;
 
-const initStats = {
-  wpm: 0,
-  progress: 0,
-};
-
 const Center = styled.div`
   position: absolute;
   inset: 0;
@@ -99,5 +87,3 @@ const Center = styled.div`
   align-items: center;
   height: 100%;
 `;
-
-type Stats = typeof initStats;

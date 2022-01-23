@@ -97,7 +97,7 @@ export const updateUserState = async (
 
   room.state.users[i] = { ...room.state.users[i], ...newState, user: userId };
 
-  await room.save();
+  await (await room.save()).populate("state.users.user", "username");
   return room.state.users;
 };
 
