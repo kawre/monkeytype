@@ -66,7 +66,7 @@ export const findAndJoinRoom = async (userId: string) => {
 };
 
 export const joinRoom = async (userId: string, roomId: string) => {
-  const room = await Room.findById(roomId);
+  const room = await Room.findOne({ _id: roomId, active: true });
   if (!room) throw new Error();
 
   if (!room.users.find((u) => u.toString() === userId)) {
@@ -76,7 +76,7 @@ export const joinRoom = async (userId: string, roomId: string) => {
     await room.save();
   }
 
-  return room.populate("quote");
+  return room.populate(["quote", "state.users.user"]);
 };
 
 export const getRoomUsersState = async (roomId: string) => {

@@ -81,6 +81,8 @@ const roomHandler = (io: Server, socket: Socket) => {
 
       const state = await usersPopulate(roomId);
 
+      console.log({ room: room.state.users, state: state.users });
+
       socket.join(roomId);
       socket.emit("room:quote", (room.quote as any).quote);
       io.to(roomId).emit("room:state", state);

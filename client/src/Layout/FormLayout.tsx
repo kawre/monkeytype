@@ -37,6 +37,8 @@ const Wrapper = styled.div`
 
 const FormContainer = styled.div``;
 
-export const SubmitFooter = styled.div``;
+export const SubmitFooter = styled.div`
+  margin-top: 1rem;
+`;
 
 export const Form = styled(elo)``;
