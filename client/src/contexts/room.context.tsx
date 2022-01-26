@@ -30,6 +30,7 @@ const initStats = {
 const initState = {
   stage: "countdown" as RoomState,
   time: 0,
+  quote: "",
 };
 
 type History = {

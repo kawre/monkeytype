@@ -1,5 +1,3 @@
-import { NextPage } from "next";
-import styled, { ThemeContext } from "styled-components";
 import {
   CategoryScale,
   Chart as ChartJS,
@@ -11,7 +9,9 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
+import { NextPage } from "next";
 import { Line } from "react-chartjs-2";
+import styled from "styled-components";
 import { useRoom } from "../../contexts/room.context";
 import { theme } from "../../styles/theme";
 import Text from "../Text";
@@ -49,7 +49,7 @@ const options = {
     y: {
       ticks: {
         autoSkip: true,
-        maxTicksLimit: 5,
+        maxTicksLimit: 8,
       },
       beginAtZero: true,
       title: {
@@ -102,26 +102,29 @@ const Results: NextPage<Props> = () => {
 
   return (
     <Wrapper>
-      <TopWrapper>
-        <Chart>
-          {/* @ts-ignore */}
-          <Line data={data} options={options} />
-        </Chart>
-      </TopWrapper>
-      <Stats>
-        <StatsWrap>
-          <StatsHeading>wpm</StatsHeading>
-          <StatsText>{Math.round(stats.wpm)}</StatsText>
-        </StatsWrap>
-        <StatsWrap>
-          <StatsHeading>acc</StatsHeading>
-          <StatsText>95%</StatsText>
-        </StatsWrap>
-        <StatsWrap>
-          <StatsHeading>time</StatsHeading>
-          <StatsText>{state.time}s</StatsText>
-        </StatsWrap>
-      </Stats>
+      <ChartWrapper>
+        <Stats>
+          <StatsWrap>
+            <StatsHeading>wpm</StatsHeading>
+            <StatsText>{Math.round(stats.wpm)}</StatsText>
+          </StatsWrap>
+          <StatsWrap>
+            <StatsHeading>acc</StatsHeading>
+            <StatsText>95%</StatsText>
+          </StatsWrap>
+          <StatsWrap>
+            <StatsHeading>time</StatsHeading>
+            <StatsText>{state.time}s</StatsText>
+          </StatsWrap>
+        </Stats>
+        <TopWrapper>
+          <Chart>
+            {/* @ts-ignore */}
+            <Line data={data} options={options} />
+          </Chart>
+        </TopWrapper>
+      </ChartWrapper>
+      <Elo></Elo>
     </Wrapper>
   );
 };
@@ -132,6 +135,10 @@ export default Results;
 
 const Wrapper = styled.div`
   margin: auto;
+`;
+
+const ChartWrapper = styled.div`
+  padding: 0 2rem;
 `;
 
 const TopWrapper = styled.div`
@@ -147,7 +154,8 @@ const Chart = styled.div`
 
 const Stats = styled.div`
   width: 100%;
-  padding: 2rem;
+  padding: 0 2rem;
+  padding-bottom: 1rem;
   display: flex;
   justify-content: space-between;
 `;
@@ -167,4 +175,12 @@ const StatsHeading = styled(Text)`
 const StatsText = styled(Text)`
   font-size: ${({ theme }) => theme.fontSizes["5xl"]};
   line-height: 1;
+`;
+
+const Elo = styled.div`
+  margin-top: 2rem;
+
+  padding: 2rem;
+  background-color: ${({ theme }) => theme.colors.neutral[800]};
+  border-radius: ${({ theme }) => theme.rounded.md};
 `;

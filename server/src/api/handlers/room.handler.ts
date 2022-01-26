@@ -78,9 +78,10 @@ const roomHandler = (io: Server, socket: Socket) => {
   const handleJoinRoom = async (roomId: string) => {
     try {
       const { state, quote } = await joinRoom(userId, roomId);
+      const { quote: quoteText } = quote as any;
 
       socket.join(roomId);
-      io.to(roomId).emit("room:state", { state, quote: quote });
+      io.to(roomId).emit("room:state", { state, quote: quoteText });
     } catch {
       socket.emit("error", "Couldn't connect");
     }

@@ -23,29 +23,32 @@ const RoomPage: Page<Props> = () => {
 
   const [users, setUsers] = useState([] as UserState[]);
   const [loading, setLoading] = useState(true);
-  const [quote, setQuote] = useState("");
 
   const { state, dispatch, stats } = useRoom();
   const { time, stage } = state;
 
   useEffect(() => {
-    if (!roomId) return;
+    if (!roomId || !socket) return;
     socket.emit("room:join", roomId);
 
     socket.on("error", (err) => {
       console.log(err);
       router.push("/");
     });
+
     socket.on("room:time", (s) => dispatch({ time: s }));
+
     socket.on("room:start", () => dispatch({ time: 0, stage: "playing" }));
+
     socket.on("room:end", () => dispatch({ stage: "postmatch" }));
+
     socket.on("room:state", ({ state, quote }) => {
       const { room, users } = state;
-      setQuote(quote.quote);
-      dispatch({ ...room });
+      dispatch({ ...room, quote });
       setUsers(users);
       setLoading(false);
     });
+
     socket.on("room:users:state", (users) => {
       setUsers(users);
     });
@@ -72,7 +75,7 @@ const RoomPage: Page<Props> = () => {
         ) : (
           <>
             <Tracks users={users} />
-            <Panel quote={quote} />
+            <Panel />
           </>
         )}
       </Wrapper>

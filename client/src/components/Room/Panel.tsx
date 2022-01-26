@@ -9,9 +9,7 @@ import { fmtMSS } from "../../utils/fmtMSS";
 import Text from "../Text";
 // Types -------------------------------------------------------------------------
 
-interface Props {
-  quote: string;
-}
+interface Props {}
 
 type Display = typeof initDisplay;
 
@@ -25,9 +23,12 @@ const initDisplay = {
 };
 
 // Component ---------------------------------------------------------------------
-const Panel: NextPage<Props> = ({ quote }) => {
+const Panel: NextPage<Props> = () => {
   const { roomId } = useRouter().query;
   const { socket } = useSocket();
+
+  const { state, setStats, stats, setHistory } = useRoom();
+  const { time, stage, quote } = state;
 
   // state
   const [rect, setRect] = useState({ top: 0, left: 0, height: 0 });
@@ -47,9 +48,6 @@ const Panel: NextPage<Props> = ({ quote }) => {
   // ref
   const inputRef = useRef<HTMLInputElement>(null);
   const currRef = useRef<HTMLSpanElement>(null);
-
-  const { state, setStats, stats, setHistory } = useRoom();
-  const { time, stage } = state;
 
   socket.on("room:start", () => {
     if (inputRef.current) inputRef.current.focus();
