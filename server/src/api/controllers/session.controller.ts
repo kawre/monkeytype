@@ -35,7 +35,7 @@ export const createSessionHandler = async (req: Request, res: Response) => {
   );
 
   res.cookie("accessToken", accessToken, {
-    maxAge: 900000, // 15m
+    maxAge: 86400000, // 15m
     httpOnly: true,
     domain: "localhost",
     path: "/",

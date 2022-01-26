@@ -1,8 +1,9 @@
 import { useRouter } from "next/router";
-import { ReactElement, useEffect, useReducer, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { PulseLoader } from "react-spinners";
 import styled from "styled-components";
 import Panel from "../../components/Room/Panel";
+import Results from "../../components/Room/Results";
 import Tracks from "../../components/Room/Tracks";
 import RoomProvider, { useRoom } from "../../contexts/room.context";
 import { useSocket } from "../../contexts/socket.context";
@@ -16,6 +17,7 @@ interface Props {}
 
 // Component ---------------------------------------------------------------------
 const RoomPage: Page<Props> = () => {
+  const router = useRouter();
   const { socket } = useSocket();
   const { roomId } = useRouter().query;
 
@@ -24,19 +26,22 @@ const RoomPage: Page<Props> = () => {
   const [quote, setQuote] = useState("");
 
   const { state, dispatch, stats } = useRoom();
-  const { time } = state;
+  const { time, stage } = state;
 
   useEffect(() => {
     if (!roomId) return;
     socket.emit("room:join", roomId);
 
-    socket.on("error", (err) => console.log(err));
-    socket.on("room:countdown", (s) => dispatch({ time: s }));
+    socket.on("error", (err) => {
+      console.log(err);
+      router.push("/");
+    });
     socket.on("room:time", (s) => dispatch({ time: s }));
     socket.on("room:start", () => dispatch({ time: 0, stage: "playing" }));
     socket.on("room:end", () => dispatch({ stage: "postmatch" }));
-    socket.on("room:quote", (quote) => setQuote(quote));
-    socket.on("room:state", ({ users, room }) => {
+    socket.on("room:state", ({ state, quote }) => {
+      const { room, users } = state;
+      setQuote(quote.quote);
       dispatch({ ...room });
       setUsers(users);
       setLoading(false);
@@ -47,7 +52,6 @@ const RoomPage: Page<Props> = () => {
 
     return () => {
       socket.emit("room:leave", roomId);
-      // socket.disconnect();
     };
   }, [roomId]);
 
@@ -63,8 +67,14 @@ const RoomPage: Page<Props> = () => {
   return (
     <Layout title={`time: ${time} wpm: ${stats.wpm}`}>
       <Wrapper>
-        <Tracks users={users} />
-        <Panel quote={quote} />
+        {stage === "postmatch" ? (
+          <Results />
+        ) : (
+          <>
+            <Tracks users={users} />
+            <Panel quote={quote} />
+          </>
+        )}
       </Wrapper>
     </Layout>
   );
@@ -76,7 +86,12 @@ RoomPage.getLayout = function getLayout(page: ReactElement) {
 
 export default RoomPage;
 
-const Wrapper = styled.div``;
+const Wrapper = styled.div`
+  span {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+`;
 
 const Center = styled.div`
   position: absolute;

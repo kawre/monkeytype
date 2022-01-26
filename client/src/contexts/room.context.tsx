@@ -8,7 +8,8 @@ import {
 } from "react";
 // Types -------------------------------------------------------------------------
 
-type State = typeof initState;
+export type State = typeof initState;
+export type Stats = typeof initStats;
 
 type RoomState = "countdown" | "playing" | "postmatch";
 
@@ -17,9 +18,9 @@ interface Context {
   dispatch: Dispatch<Partial<State>>;
   stats: Stats;
   setStats: Dispatch<Partial<Stats>>;
+  history: History;
+  setHistory: Dispatch<SetStateAction<History>>;
 }
-
-type Stats = typeof initStats;
 
 const initStats = {
   wpm: 0,
@@ -30,6 +31,11 @@ const initState = {
   stage: "countdown" as RoomState,
   time: 0,
 };
+
+type History = {
+  time: number;
+  wpm: number;
+}[];
 
 // Component ---------------------------------------------------------------------
 const RoomProvider: React.FC = ({ children }) => {
@@ -47,8 +53,9 @@ const RoomProvider: React.FC = ({ children }) => {
     }),
     initStats
   );
+  const [history, setHistory] = useState([] as Context["history"]);
 
-  const value = { state, dispatch, stats, setStats };
+  const value = { state, dispatch, stats, setStats, history, setHistory };
 
   return <RoomContext.Provider value={value}>{children}</RoomContext.Provider>;
 };

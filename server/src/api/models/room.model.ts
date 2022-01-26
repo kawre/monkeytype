@@ -11,7 +11,7 @@ export interface RoomDocument extends Document {
   updatedAt: Date;
   state: {
     users: UserState[];
-    room: RoomState;
+    room?: RoomState;
   };
 }
 
@@ -67,6 +67,11 @@ roomSchema.pre("save", async function (next) {
 
     const quote = await Quote.aggregate([{ $sample: { size: 1 } }]);
     room.quote = quote[0]._id;
+  }
+
+  if (room.state.room?.time === 0) {
+    delete room.state.room;
+    console.log(room.state);
   }
 
   return next();

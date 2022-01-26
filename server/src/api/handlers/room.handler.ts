@@ -34,28 +34,28 @@ const roomHandler = (io: Server, socket: Socket) => {
       }
 
       if (s > 0) {
-        io.to(roomId).emit("room:countdown", s);
+        io.to(roomId).emit("room:time", s);
         updateRoomState({ time: s }, roomId);
-        s--;
       } else {
         clearInterval(countdown);
         startRoomInterval(roomId);
         io.to(roomId).emit("room:start");
-        updateRoomState({ stage: "playing", time: 0 }, roomId);
+        updateRoomState({ time: s }, roomId);
       }
+
+      s--;
     }, 1000);
   };
 
   // start room
   const startRoomInterval = (roomId: string) => {
     let s = 1;
+
     const intervalId = setInterval(async () => {
       io.to(roomId).emit("room:time", s);
-      updateRoomState({ time: s }, roomId);
 
-      if (s >= 300) {
+      if (s >= 30) {
         io.to(roomId).emit("room:end");
-        updateRoomState({ stage: "postmatch" }, roomId);
         clearInterval(intervalId);
       }
 
@@ -77,17 +77,12 @@ const roomHandler = (io: Server, socket: Socket) => {
   // join room
   const handleJoinRoom = async (roomId: string) => {
     try {
-      const room = await joinRoom(userId, roomId);
-
-      const state = await usersPopulate(roomId);
-
-      console.log({ room: room.state.users, state: state.users });
+      const { state, quote } = await joinRoom(userId, roomId);
 
       socket.join(roomId);
-      socket.emit("room:quote", (room.quote as any).quote);
-      io.to(roomId).emit("room:state", state);
+      io.to(roomId).emit("room:state", { state, quote: quote });
     } catch {
-      socket.emit("error", "couldn't perform requested action");
+      socket.emit("error", "Couldn't connect");
     }
   };
 

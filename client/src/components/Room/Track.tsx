@@ -18,7 +18,10 @@ const Track: NextPage<Props> = ({ user }) => {
         <Text>{user.wpm}wpm</Text>
       </Stats>
       <Progress>
-        <ProgressLine animate={{ width: user.progress + "%" }} />
+        <ProgressLine
+          animate={{ width: user.progress + "%" }}
+          transition={{ ease: "linear" }}
+        />
       </Progress>
     </Wrapper>
   );
@@ -34,6 +37,7 @@ const Wrapper = styled.div`
 
 const Stats = styled.div`
   display: flex;
+  padding-bottom: 0.4rem;
   justify-content: space-between;
   font-size: ${({ theme }) => theme.fontSizes.lg};
   align-items: center;

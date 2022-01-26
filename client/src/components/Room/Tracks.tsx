@@ -27,4 +27,5 @@ const Wrapper = styled.div`
   display: grid;
   gap: 1rem;
   margin-bottom: 2rem;
+  padding: 0 1.5rem;
 `;

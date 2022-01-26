@@ -30,12 +30,12 @@ const Panel: NextPage<Props> = ({ quote }) => {
   const { socket } = useSocket();
 
   // state
-  const [caretPos, setCaretPos] = useState({ top: 0, left: 0, height: 0 });
+  const [rect, setRect] = useState({ top: 0, left: 0, height: 0 });
   const [idx, setIdx] = useState(0);
   const [words] = useState(quote.split(" "));
   const [wpms, setWpms] = useState(0);
   const [input, setInput] = useState("");
-  const [errors, setErrors] = useState(0);
+  const [error, setError] = useState(false);
   const [display, setDisplay] = useReducer(
     (state: Display, newState: Partial<Display>) => ({
       ...state,
@@ -48,9 +48,8 @@ const Panel: NextPage<Props> = ({ quote }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const currRef = useRef<HTMLSpanElement>(null);
 
-  const { state, setStats, stats } = useRoom();
+  const { state, setStats, stats, setHistory } = useRoom();
   const { time, stage } = state;
-  const { wpm } = stats;
 
   socket.on("room:start", () => {
     if (inputRef.current) inputRef.current.focus();
@@ -77,104 +76,123 @@ const Panel: NextPage<Props> = ({ quote }) => {
     setInput(val);
   };
 
-  useEffect(() => {
+  const handleResize = () => {
     if (!currRef.current) return;
-
     const { top, height, left } = currRef.current.getBoundingClientRect();
-    setCaretPos({ top, left, height });
+    setRect({ top, left, height });
+  };
+
+  // caret position
+  useEffect(() => {
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, [display]);
 
   // calculate wpm
   useEffect(() => {
     if (stage !== "playing") return;
-    const minute = time / 60;
-    const correct = display.former.length + display.correct.length;
-    const wpm = Math.round(correct / 5 / minute);
-    const progress = Math.round((idx / words.length) * 100);
 
-    if (!Number.isInteger(wpm)) setStats({ wpm: 0, progress });
-    else setStats({ wpm, progress });
-  }, [time, input, idx]);
+    const quoteLen = words.join("").length;
+    const correctLen = words.slice(0, idx).join("").length;
+    const progress = Math.round((correctLen / quoteLen) * 100);
+
+    const mins = (time + 1) / 60;
+    const chars = correctLen + display.correct.trim().length;
+
+    const wpm = chars / 5 / mins;
+    console.log({ chars, mins, wpm });
+
+    setStats({ wpm, progress });
+  }, [time, display]);
 
   useEffect(() => {
-    setWpms(stats.wpm);
+    setWpms(Math.round(stats.wpm));
   }, [time]);
 
   useEffect(() => {
-    if (idx === 0) return;
-    socket.emit("room:user:state", { state: stats, roomId });
-  }, [idx, time]);
+    if (stage !== "playing") return;
+    socket.emit("room:user:state", {
+      state: { ...stats, wpm: wpms },
+      roomId,
+    });
+  }, [stats.progress, wpms]);
 
   useEffect(() => {
     const elo = words[idx].slice(0, input.length);
-    let overflow = 0;
-    let errs = 0;
+    let errAt = 0;
 
     if (elo !== input) {
       for (let i = 0; i < input.length; i++) {
         if (input[i] !== elo[i]) {
-          errs = i + 1;
+          errAt = i + 1;
           break;
         }
       }
 
-      setErrors(errs);
+      setError(true);
     } else {
-      setErrors(0);
-      errs = 0;
+      setError(false);
     }
 
+    let overflow = 0;
     if (input.length > words[idx].length) {
       overflow = input.length - words[idx].length;
     }
 
-    const tase = {
+    const display = {
       former: words.slice(0, idx).join(" ") + " ",
-      correct: words[idx].slice(0, errs ? errs - 1 : input.length),
-      current: words[idx][input.length],
+      correct: words[idx].slice(0, errAt ? errAt - 1 : input.length),
+      current: words[idx][input.length] || "",
       incorrect:
-        words[idx].slice(errs - 1, input.length) +
+        words[idx].slice(errAt - 1, input.length) +
         (" " + words.slice(idx + 1).join(" ")).slice(0, overflow),
       next: words[idx].slice(input.length + 1),
       coming: (" " + words.slice(idx + 1).join(" ")).slice(overflow),
     };
 
-    setDisplay({ ...tase });
+    setDisplay(display);
   }, [input]);
+
+  useEffect(() => {
+    if (stage !== "playing" || time === 0) return;
+    const payload = { time, wpm: Math.round(stats.wpm) };
+    setHistory((prev) => [...prev, payload]);
+  }, [time]);
 
   return (
     <>
       <GameWrapper>
         <Game>
           <Caret
-            error={!!errors}
-            animate={{ ...caretPos }}
-            transition={{ duration: 0.09 }}
+            error={error}
+            animate={rect}
+            transition={{ duration: 0.1, ease: "linear" }}
           />
           <Former>{display.former}</Former>
           <Correct>{display.correct}</Correct>
-          {errors !== 0 && <Incorrect>{display.incorrect}</Incorrect>}
+          {error && <Incorrect>{display.incorrect}</Incorrect>}
           <Current ref={currRef}>{display.current}</Current>
           <Coming>{display.next}</Coming>
           <Coming>{display.coming}</Coming>
         </Game>
       </GameWrapper>
       <ControlPanel>
-        <InputWrapper>
-          <Input
-            type="text"
-            autoFocus={true}
-            error={!!errors}
-            maxLength={words[idx].length + 10}
-            ref={inputRef}
-            autoComplete="off"
-            autoCapitalize="off"
-            autoCorrect="off"
-            disabled={stage === "countdown"}
-            onChange={handleInput}
-          />
-          {!errors && <InputPlaceholder>{words[idx]}</InputPlaceholder>}
-        </InputWrapper>
+        <Input
+          error={error}
+          type="text"
+          autoFocus={true}
+          maxLength={words[idx].length + 8}
+          ref={inputRef}
+          autoComplete="off"
+          autoCapitalize="off"
+          autoCorrect="off"
+          disabled={stage === "countdown"}
+          onChange={handleInput}
+        />
         <Blocks>
           <Block>
             <Text mr={1} fontSize={"2xl"}>
@@ -242,19 +260,16 @@ const ControlPanel = styled.div`
   gap: 1rem;
 `;
 
-const InputWrapper = styled.div`
+const Input = styled.input<{ error: boolean }>`
   width: 100%;
   position: relative;
-  font-size: ${({ theme }) => theme.fontSizes["2xl"]};
-`;
-
-const Input = styled.input<{ error: boolean }>`
   background-color: ${({ theme }) => theme.colors.neutral[800]};
   border: 0.15rem solid ${({ theme }) => theme.colors.neutral[700]};
-  border-radius: ${({ theme }) => theme.rounded.md};
-  transition: 100ms ease;
-  width: 100%;
+  font-size: ${({ theme }) => theme.fontSizes["2xl"]};
   padding: 0.75rem 1.5rem;
+  transition: 100ms ease;
+  border-radius: ${({ theme }) => theme.rounded.md};
+  overflow: hidden;
 
   &:focus {
     border-color: ${({ theme, error }) =>
@@ -264,19 +279,6 @@ const Input = styled.input<{ error: boolean }>`
   &:disabled {
     cursor: not-allowed;
   }
-`;
-
-const InputPlaceholder = styled.div`
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  padding: 0.75rem 1.5rem;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  border: 2px solid transparent;
-  user-select: none;
-  color: ${({ theme }) => theme.colors.neutral[500]}4D;
 `;
 
 const Blocks = styled.div`
