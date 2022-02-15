@@ -1,4 +1,4 @@
-import type { NextPage } from "next";
+import { NextPage } from "next";
 import Intro from "../components/Intro";
 import Layout from "../Layout/Layout";
 

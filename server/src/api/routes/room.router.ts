@@ -7,7 +7,7 @@ import User from "../models/user.model";
 
 const rooms = Router();
 
-rooms.delete("/cleardb", async (req, res) => {
+rooms.delete("/cleardb", async (_, res) => {
   await Room.deleteMany({});
   await User.deleteMany({});
   await Session.deleteMany({});
@@ -16,7 +16,7 @@ rooms.delete("/cleardb", async (req, res) => {
 
 rooms.post("/quote", createQuoteHandler);
 
-rooms.get("/quote", async (req, res) => {
+rooms.get("/quote", async (_, res) => {
   const quotes = await Quote.find();
   return res.send(quotes);
 });
